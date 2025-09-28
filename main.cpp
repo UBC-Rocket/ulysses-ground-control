@@ -1,6 +1,8 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
+// #include <QQuickView>
+
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
@@ -13,6 +15,12 @@ int main(int argc, char *argv[])
         []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
     engine.loadFromModule("ulysses_ground_control", "Main");
+
+
+    // QQuickView view;
+    // view.setSource(QUrl(QStringLiteral("Source Files/Main.qml")));
+    // view.showFullScreen();
+
 
     return app.exec();
 }
