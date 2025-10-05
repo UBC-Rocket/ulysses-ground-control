@@ -9,7 +9,7 @@ ApplicationWindow {
     width: 1400
     height: 900
     visible: true
-    title: qsTr("Ground Satation UI")
+    title: qsTr("Ulysses Ground Control")
     color: "#111827"
 
     //Import all the keyboard shortcuts
