@@ -4,29 +4,14 @@ import QtQuick.Layouts
 import QtQuick3D
 import QtQuick3D.Helpers
 
+
+
 BasePanel {
     id: panel_Rocket_Visualization
 
     BaseHeader {
         id:header
         headerText: "Rocket Visualization"
-    }
-
-    Item {
-        id: visualization_panel
-        anchors.top: header.bottom
-        anchors.left: parent.left
-        anchors.topMargin: 15
-        anchors.leftMargin: 15
-        height: 50
-        Text {
-            //Initializing Header for Rocket Visualization
-            id: header_Rocket_Visualization
-            color: "#93C5FD"
-            text: "Rocket Visualization"
-            font.pixelSize: 20
-            font.bold: true
-        }
     }
 
     Item {
@@ -40,12 +25,13 @@ BasePanel {
         anchors.bottomMargin: 10
 
         //Variables & Constants declared
-           property real x_kal: 0
-           property real y_kal: 0
+           property real x_kal: 20
+           property real y_kal: -10
            property real length: 20        // shaft length
            property real thickness: 0.02       // shaft thickness
 
            //FAKE DATA
+
            Timer {
                interval: 16
                repeat: true
@@ -59,14 +45,15 @@ BasePanel {
                }
            }
 
+
            //3D render of rocket's angle
            View3D{
                anchors.fill: parent
 
                PerspectiveCamera{
                    id: cam
-                   position: Qt.vector3d(400,200,400)
-                   lookAtNode: rocket_frame
+                   position: Qt.vector3d(450,200,450)
+                   lookAtNode: rocket_model
                }
 
                environment: SceneEnvironment{
@@ -83,11 +70,10 @@ BasePanel {
                    //Qt has y-axis pointing up by default. So the y-axis rotation is actually the "z-axis"
                    eulerRotation: Qt.vector3d(visualization.x_kal, 0, visualization.y_kal)
 
-                   Model{
-                       source: "#Cylinder"
-                       materials: DefaultMaterial{
-                           diffuseColor: "#3860c7"
-                       }
+                   Rocket{
+                       id: rocket_model
+                       scale: Qt.vector3d(0.45,0.45,0.45)
+                       position: Qt.vector3d(0, 0, 0)
                    }
 
                    //Helper lines to visualize tilt
