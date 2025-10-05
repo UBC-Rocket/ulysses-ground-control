@@ -5,13 +5,6 @@ import QtQuick.Window
 Item {
 
     property Window targetWindow
-    // property bool ctrl
-
-    // Shortcut {
-    //     sequence: "Control"
-
-
-    // }
 
     Shortcut {
         sequence: "Ctrl+Q"
