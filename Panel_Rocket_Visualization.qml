@@ -25,13 +25,14 @@ BasePanel {
         anchors.bottomMargin: 10
 
         //Variables & Constants declared
-           property real x_kal: 20
-           property real y_kal: -10
+           property real x_kal: 0
+           property real y_kal: 0
            property real length: 20        // shaft length
            property real thickness: 0.02       // shaft thickness
 
            //FAKE DATA
 
+                   /*
            Timer {
                interval: 16
                repeat: true
@@ -40,10 +41,12 @@ BasePanel {
                property real t: 0
                onTriggered: {
                    t += interval/1000
-                   visualization.x_kal = 25 * Math.sin(2*Math.PI*0.27 * t)          // fake X angle
+                   visualization.x_kal = 25 * Math.sin(2*Math.PI*0.27 * t)          // generating random fake X angle
                    visualization.y_kal = 35 * Math.sin(2*Math.PI*0.19 * t + 1.1)    // fake Y angle
                }
            }
+           */
+
 
 
            //3D render of rocket's angle
@@ -69,11 +72,11 @@ BasePanel {
 
                    //Qt has y-axis pointing up by default. So the y-axis rotation is actually the "z-axis"
                    eulerRotation: Qt.vector3d(visualization.x_kal, 0, visualization.y_kal)
+                   position: Qt.vector3d(0,0,0)
 
                    Rocket{
                        id: rocket_model
                        scale: Qt.vector3d(0.45,0.45,0.45)
-                       position: Qt.vector3d(0, 0, 0)
                    }
 
                    //Helper lines to visualize tilt
