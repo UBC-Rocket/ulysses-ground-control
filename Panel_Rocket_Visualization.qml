@@ -53,7 +53,7 @@ Rectangle {
 
            //FAKE DATA
 
-                   /*
+
            Timer {
                interval: 16
                repeat: true
@@ -66,7 +66,7 @@ Rectangle {
                    visualization.y_kal = 35 * Math.sin(2*Math.PI*0.19 * t + 1.1)    // fake Y angle
                }
            }
-           */
+
 
 
 
