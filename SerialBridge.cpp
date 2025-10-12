@@ -11,7 +11,6 @@ SerialBridge::SerialBridge(QObject* parent) : QObject(parent) {
     connect(&m_rx, &QSerialPort::errorOccurred, this, &SerialBridge::onRxErrorOccurred); // surface RX-side driver/USB errors
 }
 
-//插拔USB ports 信息会变
 void SerialBridge::refreshPorts() {
     QStringList list;
     for (const QSerialPortInfo& info : QSerialPortInfo::availablePorts()) {
