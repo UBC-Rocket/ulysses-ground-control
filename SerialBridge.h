@@ -156,7 +156,7 @@ signals:
      * NOTE: Spelling is kept as in your current code ("Recieved"). If you later rename
      * to rxTextReceived, remember to also update QML handlers and moc-generated code.
      */
-    void rxTextRecieved(const QString &line);
+    void rxTextReceived(const QString &line);
 
 private slots:
     /**

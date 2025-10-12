@@ -128,7 +128,7 @@ void SerialBridge::onRxReadyRead() {
         QString text = QString::fromUtf8(line);      // prefer UTF-8 for wide characters
         if (text.isNull()) text = QString::fromLatin1(line); // fallback preserves visibility for non-UTF8 bytes
 
-        emit rxTextRecieved(text); // one signal per line keeps QML appending logic simple/predictable
+        emit rxTextReceived(text); // one signal per line keeps QML appending logic simple/predictable
     }
 }
 
