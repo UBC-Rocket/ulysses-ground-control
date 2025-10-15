@@ -4,7 +4,7 @@ project(ulysses_ground_control VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick Qml SerialPort)
+find_package(Qt6 REQUIRED COMPONENTS Quick Qml SerialPort )
 
 qt_standard_project_setup(REQUIRES 6.8)
 

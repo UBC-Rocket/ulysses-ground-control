@@ -140,6 +140,10 @@ signals:
     void txPortNameChanged();
     void rxPortNameChanged();
 
+    /// Emitted when the TX ot RX port does not connected to a radio modem
+    void butTxNotRadioModem();
+    void butRxNotRadioModem();
+
     // -----------------------
     // App-level signals
     // -----------------------
@@ -188,6 +192,8 @@ private:
      * do not duplicate UI plumbing.
      */
     void emitError(const QString &msg);
+    static bool looksLikeRadio(const QSerialPortInfo &info);
+    static bool probeRadio_AT(QSerialPort &port);
 
     /**
      * @brief openPort
