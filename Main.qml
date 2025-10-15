@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-
+import QtQuick.Window
 
 ApplicationWindow {
     //Initializing the Window
@@ -36,4 +36,35 @@ ApplicationWindow {
         }
 
     }
+
+    property var radioConsole: null
+
+    Component {
+        id: radioConsoleComponent
+        RadioTestWindow { }
+    }
+
+    function openRadioConsole() {
+        if (!radioConsole) {
+            radioConsole = radioConsoleComponent.createObject(window, {
+                x: window.x + 60,
+                y: window.y + 60
+            })
+        }
+        radioConsole.show()
+        radioConsole.raise()
+        radioConsole.requestActivate()
+    }
+
+    // Top-right button to open the radio window
+    Button {
+        id: openRadioBtn
+        text: "Open Radio Console"
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.margins: 8
+        z: 9999
+        onClicked: openRadioConsole()
+    }
+
 }

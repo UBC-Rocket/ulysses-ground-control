@@ -4,7 +4,7 @@ project(ulysses_ground_control VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick)
+find_package(Qt6 REQUIRED COMPONENTS Quick Qml SerialPort )
 
 qt_standard_project_setup(REQUIRES 6.8)
 
@@ -30,6 +30,9 @@ qt_add_qml_module(appulysses_ground_control
         Panel_Engine_Control.qml
         Panel_Telemetry_Data.qml
         Panel_System_Alert.qml
+        SOURCES SerialBridge.h
+        SOURCES SerialBridge.cpp
+        QML_FILES RadioTestWindow.qml
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -45,6 +48,7 @@ set_target_properties(appulysses_ground_control PROPERTIES
 
 target_link_libraries(appulysses_ground_control
     PRIVATE Qt6::Quick
+            Qt6::SerialPort
 )
 
 include(GNUInstallDirs)
