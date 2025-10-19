@@ -30,6 +30,9 @@ qt_add_qml_module(appulysses_ground_control
         Panel_Engine_Control.qml
         Panel_Telemetry_Data.qml
         Panel_System_Alert.qml
+        assets/rocket/Rocket.qml
+    RESOURCES
+        assets/rocket/meshes/node3.mesh
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
