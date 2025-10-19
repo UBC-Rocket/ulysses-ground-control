@@ -27,8 +27,8 @@ BasePanel {
         //Variables & Constants declared
            property real x_kal: 0
            property real y_kal: 0
-           property real length: 20        // shaft length
-           property real thickness: 0.02       // shaft thickness
+           property real length: 200        // shaft length
+           property real thickness: 0.2       // shaft thickness
 
            //FAKE DATA
 
@@ -55,8 +55,8 @@ BasePanel {
 
                PerspectiveCamera{
                    id: cam
-                   position: Qt.vector3d(450,200,450)
-                   lookAtNode: rocket_model
+                   position: Qt.vector3d(4500,2000,4500)
+                   lookAtNode: rocket_frame
                }
 
                environment: SceneEnvironment{
@@ -66,23 +66,36 @@ BasePanel {
 
                DirectionalLight{}
 
-               //The actual rocket frame
+
+
+               //The actual rocket framh
                Node{
                    id: rocket_frame
 
                    //Qt has y-axis pointing up by default. So the y-axis rotation is actually the "z-axis"
                    eulerRotation: Qt.vector3d(visualization.x_kal, 0, visualization.y_kal)
-                   position: Qt.vector3d(0,0,0)
+                   pivot: Qt.vector3d(0,0,0)
 
-                   Rocket{
-                       id: rocket_model
-                       scale: Qt.vector3d(0.45,0.45,0.45)
+                   property real d: 10          // diameter
+                   property real h_body: 30    // cylinder height
+                   property real h_nose: h_body/3
+
+                   Model{
+                           source: "#Cylinder"
+                           scale: Qt.vector3d(rocket_frame.d, rocket_frame.h_body, rocket_frame.d)
+                           materials: DefaultMaterial { diffuseColor: "#d9d9d9" }
+                   }
+
+                   Model {
+                       source: "#Cone"
+                       position: Qt.vector3d(0,1500,0)
+                       scale: Qt.vector3d(rocket_frame.d, rocket_frame.h_nose, rocket_frame.d)
+                       materials: DefaultMaterial { diffuseColor: "#d9d9d9" }
                    }
 
                    //Helper lines to visualize tilt
                    Model{
                        source: "#Cylinder"
-                       position: Qt.vector3d(0,1000,0)
                        scale: Qt.vector3d(visualization.thickness, visualization.length, visualization.thickness)
                        materials: DefaultMaterial{
                            diffuseColor: "green"
@@ -114,13 +127,17 @@ BasePanel {
                    enableXYGrid: true
                    enableXZGrid: false
                    enableYZGrid: true
+                   gridOpacity: 0.2
+                   scale: Qt.vector3d(10,10,10)
                }
 
                //Press A and D to switch move view of camera
                WasdController{
                    controlledObject: cam
-                   forwardSpeed: 1
-                   backSpeed: 1
+                   leftSpeed: 20
+                   rightSpeed: 20
+                   forwardSpeed: 10
+                   backSpeed: 10
                    upSpeed: 0
                    downSpeed: 0
                    mouseEnabled: false
