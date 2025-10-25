@@ -4,6 +4,7 @@
 #include <QCommandLineParser>
 #include <QTimer>
 #include "SerialBridge.h"
+#include "CommandSender.h"
 
 // #include <QQuickView>
 
@@ -12,9 +13,11 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     SerialBridge bridge;
+    CommandSender commandsender(&bridge);
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("bridge", &bridge);
+    engine.rootContext()->setContextProperty("commandsender", &commandsender);
 
     QObject::connect(
         &engine,
