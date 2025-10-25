@@ -30,7 +30,7 @@ GridLayout {
         yaw: 40
     }
 
-    Panel_Kalman_Filtered_Angle {
+    Panel_Control {
         Layout.margins: margin
         Layout.fillWidth: true
         Layout.fillHeight: true

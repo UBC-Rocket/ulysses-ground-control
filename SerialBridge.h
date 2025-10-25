@@ -100,7 +100,7 @@ public:
     // -----------------------
 
     /// Returns the current cached list of available serial port names.
-    QStringList ports() const { return m_ports; }
+    Q_INVOKABLE QStringList ports() const { return m_ports; }
 
     /// True if the TX serial port (m_tx) is open.
     bool txConnected() const { return m_tx.isOpen(); }
@@ -109,7 +109,7 @@ public:
     bool rxConnected() const { return m_rx.isOpen(); }
 
     /// The OS port name bound to the TX side (empty if not connected).
-    QString txPortName() const { return m_tx.portName(); }
+    Q_INVOKABLE QString txPortName() const { return m_tx.portName(); }
 
     /// The OS port name bound to the RX side (empty if not connected).
     QString rxPortName() const { return m_rx.portName(); }
