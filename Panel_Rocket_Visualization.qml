@@ -5,7 +5,6 @@ import QtQuick3D
 import QtQuick3D.Helpers
 
 
-
 BasePanel {
     id: panel_Rocket_Visualization
 
@@ -31,9 +30,7 @@ BasePanel {
            property real length: 200        // shaft length
            property real thickness: 0.4       // shaft thickness
 
-           //FAKE DATA
-
-
+        //FAKE DATA
            Timer {
                interval: 16
                repeat: true
@@ -136,7 +133,7 @@ BasePanel {
                    scale: Qt.vector3d(10,10,10)
                }
 
-               //Press A and D to switch move view of camera
+               //Press W,A,S,D to move view of camera
                WasdController{
                    controlledObject: cam
                    leftSpeed: 20
