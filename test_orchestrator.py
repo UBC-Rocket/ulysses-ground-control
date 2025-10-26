@@ -22,6 +22,10 @@ tests = discover_test()
 
 # Runs a singular test 
 def run_test(test_file):
+    if not(test_file in tests): 
+        print("Test was not found")
+        return
+    
     print(f"\nRunning {test_file} ... \n")
     start = time.time()
 
