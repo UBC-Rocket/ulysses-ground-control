@@ -48,7 +48,7 @@ def run_test(test_file):
         }
     except subprocess.CalledProcessError as e:
         duration = time.time() - start
-        print(f"Test failed -- {test_file}\nReturn Code: 1 \nDuration: {round(duration, 2)} seconds")
+        print(f"Test failed -- {test_file}\nReturn Code: 1 \nDuration: {round(duration, 2)} seconds \n {e.stdout}" )
         return {
         "file": test_file,
         "passed": 1,
