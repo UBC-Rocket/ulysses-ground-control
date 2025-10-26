@@ -27,8 +27,9 @@ BasePanel {
         //Variables & Constants declared
            property real x_kal: 0
            property real y_kal: 0
+           property real z_roll: 0
            property real length: 200        // shaft length
-           property real thickness: 0.2       // shaft thickness
+           property real thickness: 0.4       // shaft thickness
 
            //FAKE DATA
 
@@ -43,6 +44,7 @@ BasePanel {
                    t += interval/1000
                    visualization.x_kal = 25 * Math.sin(2*Math.PI*0.27 * t)          // generating random fake X angle
                    visualization.y_kal = 35 * Math.sin(2*Math.PI*0.19 * t + 1.1)    // fake Y angle
+                   visualization.z_roll = 120 * Math.sin(2*Math.PI*0.1 * t + 0.2)   // fake roll anlge
                }
            }
 
@@ -73,19 +75,22 @@ BasePanel {
                    id: rocket_frame
 
                    //Qt has y-axis pointing up by default. So the y-axis rotation is actually the "z-axis"
-                   eulerRotation: Qt.vector3d(visualization.x_kal, 0, visualization.y_kal)
+                   eulerRotation: Qt.vector3d(visualization.x_kal, visualization.z_roll, visualization.y_kal)
                    pivot: Qt.vector3d(0,0,0)
 
                    property real d: 10          // diameter
                    property real h_body: 30    // cylinder height
-                   property real h_nose: h_body/3
+                   property real h_nose: h_body/3 //nose height
 
+
+                   //body
                    Model{
                            source: "#Cylinder"
                            scale: Qt.vector3d(rocket_frame.d, rocket_frame.h_body, rocket_frame.d)
                            materials: DefaultMaterial { diffuseColor: "#d9d9d9" }
                    }
 
+                   //top cone
                    Model {
                        source: "#Cone"
                        position: Qt.vector3d(0,1500,0)
