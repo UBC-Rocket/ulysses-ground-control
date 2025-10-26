@@ -24,17 +24,19 @@ ApplicationWindow {
     Rectangle {
         //Initialize the actual content board
         id: contentBoard
+
         width: parent.width - 4
         height: parent.height - (headerMain.height) - 4
-        y: headerMain.height
-        anchors.horizontalCenter: parent.horizontalCenter
         color: "#111827"
+        anchors {
+            top: headerMain.bottom
+            horizontalCenter: parent.horizontalCenter
+        }
+
 
         // Initialize the layout
         LayoutGrid {
-
         }
-
     }
 
     property var radioConsole: null

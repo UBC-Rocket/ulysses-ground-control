@@ -20,19 +20,27 @@ qt_add_qml_module(appulysses_ground_control
         Header.qml
         Shortcuts.qml
         LayoutGrid.qml
-        DataBox.qml
-        #
+
         Panel_Test.qml
-        Panel_IMU_Data.qml
-        Panel_Kalman_Filtered_Angle.qml
+        Panel_IMU_And_Kalman_Data.qml
         Panel_Rocket_Visualization.qml
-        Panel_Baro_Data.qml
         Panel_Engine_Control.qml
-        Panel_Telemetry_Data.qml
+        Panel_Baro_And_Telemetry_Data.qml
         Panel_System_Alert.qml
-        SOURCES SerialBridge.h
-        SOURCES SerialBridge.cpp
-        QML_FILES RadioTestWindow.qml
+
+        Items/BaseHeader.qml
+        Items/BasePanel.qml
+        Items/Data.qml
+        Items/DataBox.qml
+        Items/DataBoxList.qml
+
+        RadioTestWindow.qml
+
+        SOURCES
+            SerialBridge.h
+            SerialBridge.cpp
+
+
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
