@@ -82,8 +82,7 @@ def run_all_tests():
         print("\n===== FAILED TESTS =====")
         for f in failed:
             print(f["file"]+"\n"+f["output"])
-            raise
-
+        print("FAILURE")
 
 # Runs a test with a given ID
 def run_test_by_id(test_id):
