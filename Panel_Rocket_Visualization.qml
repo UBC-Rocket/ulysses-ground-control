@@ -15,13 +15,16 @@ BasePanel {
 
     Item {
         id: visualization
-        anchors.top: header.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.rightMargin: 10
-        anchors.leftMargin: 10
-        anchors.bottomMargin: 10
+
+        anchors{
+                   top: header.bottom
+                   left: parent.left
+                   right: parent.right
+                   bottom: parent.bottom
+                   leftMargin: 10
+                   rightMargin: 10
+                   bottomMargin: 10
+        }
 
         //Variables & Constants declared
            property real x_kal: 0
