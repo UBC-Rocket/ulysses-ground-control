@@ -41,6 +41,10 @@ ApplicationWindow {
         function onButRxNotRadioModem(portName) { if (bridge.rxConnected) rxWarn = true }        // RX flag if you add a bar later
     }
 
+    Connections {
+        target: commandsender
+    }
+
     // Top bar
     header: ToolBar {
         RowLayout {
@@ -149,6 +153,27 @@ ApplicationWindow {
                                     }
                                 }
                             }
+                        }
+
+                        Item { Layout.fillHeight: true }                  // balance columns visually
+                    }
+                }
+
+                GroupBox {
+                    title: "Continuously Transmitting signals"
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+
+                    ColumnLayout {
+                        anchors.fill: parent
+                        spacing: 8
+                        Button {
+                            text: "Start 50Hz";
+                            onClicked: commandsender.startPeriodic("H", 50)
+                        }
+                        Button {
+                            text: "Stop";
+                            onClicked: commandsender.stopPeriodic()
                         }
 
                         Item { Layout.fillHeight: true }                  // balance columns visually
