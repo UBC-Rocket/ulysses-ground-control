@@ -30,26 +30,26 @@ BasePanel {
 
 
         //Variables & Constants declared
-           property real x_kal: 0
-           property real y_kal: 0
-           property real z_roll: 0
+           property real x_kal: sensorData.imuX
+           property real y_kal: sensorData.imuY
+           property real z_roll: sensorData.imuZ
            property real length: 200        // shaft length
            property real thickness: 0.4       // shaft thickness
 
         //FAKE DATA
-           Timer {
-               interval: 16
-               repeat: true
-               running: true
-               triggeredOnStart: true
-               property real t: 0
-               onTriggered: {
-                   t += interval/1000
-                   visualization.x_kal = 25 * Math.sin(2*Math.PI*0.27 * t)          // generating random fake X angle
-                   visualization.y_kal = 35 * Math.sin(2*Math.PI*0.19 * t + 1.1)    // fake Y angle
-                   visualization.z_roll = 120 * Math.sin(2*Math.PI*0.1 * t + 0.2)   // fake roll anlge
-               }
-           }
+        //    Timer {
+        //        interval: 16
+        //        repeat: true
+        //        running: true
+        //        triggeredOnStart: true
+        //        property real t: 0
+        //        onTriggered: {
+        //            t += interval/1000
+        //            visualization.x_kal = 25 * Math.sin(2*Math.PI*0.27 * t)          // generating random fake X angle
+        //            visualization.y_kal = 35 * Math.sin(2*Math.PI*0.19 * t + 1.1)    // fake Y angle
+        //            visualization.z_roll = 120 * Math.sin(2*Math.PI*0.1 * t + 0.2)   // fake roll anlge
+        //        }
+        //    }
 
 
 
