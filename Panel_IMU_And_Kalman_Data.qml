@@ -4,17 +4,19 @@ import "Items"
 BasePanel {
     id: panel_IMU_and_Kalman
 
-    //Parameters from IMU
-    property double x_axis
-    property double y_axis
-    property double z_axis
-    property double roll
-    property double pitch
-    property double yaw
+    // IMU - Accelerometer
+    property double x_axis: sensorData.imuX
+    property double y_axis: sensorData.imuY
+    property double z_axis: sensorData.imuZ
+    
+    // IMU - Gyroscope
+    property double roll: sensorData.roll
+    property double pitch: sensorData.pitch
+    property double yaw: sensorData.yaw
 
-    //Parameters from Kalman
-    property double raw_angle
-    property double filtered_angle
+    // Kalman Filter
+    property double raw_angle: sensorData.rawAngle
+    property double filtered_angle: sensorData.filteredAngle
 
 
     BaseHeader {
@@ -48,7 +50,7 @@ BasePanel {
 
             size: 3
             dataNames: ["X-AXIS", "Y-AXIS", "Z-AXIS"]
-            dataValues: [100,200,300]
+            dataValues: [x_axis, y_axis, z_axis]
         }
     }
 
@@ -77,7 +79,7 @@ BasePanel {
 
             size: 3
             dataNames: ["ROLL", "PITCH", "YAW"]
-            dataValues: [1,2,3]
+            dataValues: [roll, pitch, yaw];
         }
     }
 

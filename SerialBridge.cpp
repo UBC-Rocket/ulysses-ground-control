@@ -4,6 +4,7 @@
 #include <QSerialPortInfo>
 #include <QElapsedTimer>
 #include <QThread>
+#include <QDebug>
 
 SerialBridge::SerialBridge(QObject* parent) : QObject(parent) {
     refreshPorts(); // Build the initial COM list so the UI has a correct starting point.
@@ -169,7 +170,53 @@ void SerialBridge::onRxReadyRead() {
         if (text.isNull()) text = QString::fromLatin1(line); // Fallback so binary-ish data still displays legibly.
 
         emit rxTextReceived(text); // Emit one logical line to QML; easy to append and log in the UI.
+        parseIncomingData(text); // Parse for sensor data
     }
+}
+
+void SerialBridge::parseIncomingData(const QString& line) {
+    // Skip empty lines
+    if (line.trimmed().isEmpty()) return;
+    
+    // Split by comma
+    QStringList parts = line.split(',', Qt::SkipEmptyParts);
+    
+    // Expected CSV format (14 values):
+    // x,y,z,roll,pitch,yaw,pressure,altitude,raw_angle,filtered_angle,velocity,temperature,signal,battery
+    
+    if (parts.size() != 14) {
+        // Only log errors occasionally to avoid spam at 50Hz
+        static int errorCount = 0;
+        if (++errorCount % 50 == 0) {
+            qWarning() << "Expected 14 CSV fields, got" << parts.size() << "in line:" << line;
+        }
+        return;
+    }
+    
+    // Parse all values (positions 0-13)
+    double x     = parts[0].toDouble();  // X-axis acceleration
+    double y     = parts[1].toDouble();  // Y-axis acceleration
+    double z     = parts[2].toDouble();  // Z-axis acceleration
+    double roll  = parts[3].toDouble();  // Roll rate
+    double pitch = parts[4].toDouble();  // Pitch rate
+    double yaw   = parts[5].toDouble();  // Yaw rate
+    
+    double pressure = parts[6].toDouble();  // Barometric pressure
+    double altitude = parts[7].toDouble();  // Altitude
+    
+    double rawAngle      = parts[8].toDouble();   // Raw angle
+    double filteredAngle = parts[9].toDouble();   // Kalman filtered angle
+    
+    double velocity    = parts[10].toDouble();  // Velocity
+    double temperature = parts[11].toDouble();  // Temperature
+    double signal      = parts[12].toDouble();  // Signal strength
+    double battery     = parts[13].toDouble();  // Battery level
+    
+    // Emit signals to notify the data model
+    emit imuDataReceived(x, y, z, roll, pitch, yaw);
+    emit kalmanDataReceived(rawAngle, filteredAngle);
+    emit baroDataReceived(pressure, altitude);
+    emit telemetryDataReceived(velocity, temperature, signal, battery);
 }
 
 void SerialBridge::onTxErrorOccurred(QSerialPort::SerialPortError e) {
