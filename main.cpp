@@ -4,7 +4,10 @@
 #include <QCommandLineParser>
 #include <QTimer>
 #include "SerialBridge.h"
+<<<<<<< HEAD
 #include "SensorDataModel.h"
+=======
+>>>>>>> 0fcf271 (Resolve stash conflicts: restore System Alarm/Control changes)
 #include "CommandSender.h"
 #include "AlarmReceiver.h"
 
@@ -13,6 +16,7 @@ int main(int argc, char *argv[])
     // Qt GUI application (event loop owner)
     QGuiApplication app(argc, argv);
 
+<<<<<<< HEAD
     SerialBridge bridge;
     SensorDataModel sensorData;
 
@@ -30,6 +34,18 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("bridge", &bridge);
     engine.rootContext()->setContextProperty("sensorData", &sensorData);
+=======
+    // Backend objects live for the duration of main()
+    SerialBridge   bridge;                   // serial I/O backend
+    CommandSender  commandsender(&bridge);   // sends commands via bridge
+    AlarmReceiver  alarmreceiver(&bridge);   // receives/decodes alarms via bridge
+
+    // QML engine + expose C++ backends to QML by name
+    QQmlApplicationEngine engine;
+    engine.rootContext()->setContextProperty("bridge", &bridge);
+    engine.rootContext()->setContextProperty("commandsender", &commandsender);
+    engine.rootContext()->setContextProperty("alarmreceiver", &alarmreceiver);
+>>>>>>> 0fcf271 (Resolve stash conflicts: restore System Alarm/Control changes)
 
     // If QML fails to load, quit with error code
     QObject::connect(
