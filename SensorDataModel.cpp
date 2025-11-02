@@ -1,4 +1,5 @@
 #include "SensorDataModel.h"
+#include <QDebug>
 
 // Contructor
 SensorDataModel::SensorDataModel(QObject* parent) : QObject(parent) {

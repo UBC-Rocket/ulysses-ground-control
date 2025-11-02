@@ -14,10 +14,22 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     SerialBridge bridge;
+    SensorDataModel sensorData;
+
+    // Connect and VERIFY
+    bool ok1 = QObject::connect(&bridge, &SerialBridge::imuDataReceived,
+                                &sensorData, &SensorDataModel::updateIMU);
+    bool ok2 = QObject::connect(&bridge, &SerialBridge::kalmanDataReceived,
+                                &sensorData, &SensorDataModel::updateKalman);
+    bool ok3 = QObject::connect(&bridge, &SerialBridge::baroDataReceived,
+                                &sensorData, &SensorDataModel::updateBaro);
+    bool ok4 = QObject::connect(&bridge, &SerialBridge::telemetryDataReceived,
+                                &sensorData, &SensorDataModel::updateTelemetry);
 
     // QML engine + expose C++ backends to QML by name
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("bridge", &bridge);
+    engine.rootContext()->setContextProperty("sensorData", &sensorData);
 
     // If QML fails to load, quit with error code
     QObject::connect(

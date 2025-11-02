@@ -144,6 +144,7 @@ signals:
     void butTxNotRadioModem();
     void butRxNotRadioModem();
 
+
     // -----------------------
     // App-level signals
     // -----------------------

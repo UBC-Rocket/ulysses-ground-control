@@ -175,11 +175,14 @@ void SerialBridge::onRxReadyRead() {
 }
 
 void SerialBridge::parseIncomingData(const QString& line) {
+
+
     // Skip empty lines
     if (line.trimmed().isEmpty()) return;
     
     // Split by comma
     QStringList parts = line.split(',', Qt::SkipEmptyParts);
+
     
     // Expected CSV format (14 values):
     // x,y,z,roll,pitch,yaw,pressure,altitude,raw_angle,filtered_angle,velocity,temperature,signal,battery
@@ -211,6 +214,9 @@ void SerialBridge::parseIncomingData(const QString& line) {
     double temperature = parts[11].toDouble();  // Temperature
     double signal      = parts[12].toDouble();  // Signal strength
     double battery     = parts[13].toDouble();  // Battery level
+
+    // Logging
+    qDebug() << "Emitting signals - IMU X:" << x;
     
     // Emit signals to notify the data model
     emit imuDataReceived(x, y, z, roll, pitch, yaw);
