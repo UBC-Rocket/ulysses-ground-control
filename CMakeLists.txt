@@ -15,6 +15,7 @@ qt_add_executable(appulysses_ground_control
 qt_add_qml_module(appulysses_ground_control
     URI ulysses_ground_control
     VERSION 1.0
+
     QML_FILES
         Main.qml
         Header.qml
@@ -23,6 +24,7 @@ qt_add_qml_module(appulysses_ground_control
 
         Panel_Test.qml
         Panel_IMU_And_Kalman_Data.qml
+        Panel_Control.qml
         Panel_Rocket_Visualization.qml
         Panel_Engine_Control.qml
         Panel_Baro_And_Telemetry_Data.qml
@@ -37,15 +39,14 @@ qt_add_qml_module(appulysses_ground_control
         RadioTestWindow.qml
 
         SOURCES
-            SerialBridge.h
-            SerialBridge.cpp
-
-
+                SerialBridge.h
+                SerialBridge.cpp
+                CommandSender.h
+                CommandSender.cpp
+                AlarmReceiver.h
+                AlarmReceiver.cpp
 )
 
-# Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
-# If you are developing for iOS or macOS you should consider setting an
-# explicit, fixed bundle identifier manually though.
 set_target_properties(appulysses_ground_control PROPERTIES
 #    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.appulysses_ground_control
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
