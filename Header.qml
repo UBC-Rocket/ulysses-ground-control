@@ -46,6 +46,5 @@ Rectangle {
         color: "#16213e"
         width: parent.width
         height: 2
-
     }
 }

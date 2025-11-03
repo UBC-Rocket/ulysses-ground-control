@@ -45,6 +45,7 @@ qt_add_qml_module(appulysses_ground_control
                 CommandSender.cpp
                 AlarmReceiver.h
                 AlarmReceiver.cpp
+                QML_FILES Items/BaseResize.qml
 )
 
 set_target_properties(appulysses_ground_control PROPERTIES
