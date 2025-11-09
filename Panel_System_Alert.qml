@@ -84,12 +84,13 @@ Rectangle {
             boundsBehavior: Flickable.StopAtBounds
 
             ScrollBar.vertical: Basic.ScrollBar {
+                id: scrollBar
                 policy: ScrollBar.AsNeeded
                 contentItem: Rectangle {
                     implicitWidth: 6
                     radius: width/2
-                    color: control.pressed ? "#536173"
-                         : control.hovered ? "#455264"
+                    color: scrollBar.pressed ? "#536173"
+                         : scrollBar.hovered ? "#455264"
                          :                    "#394454"
                 }
                 background: Rectangle { color: "transparent" }
