@@ -96,6 +96,7 @@ BasePanel {
                    //top cone
                    Model {
                        source: "#Cone"
+                       position: Qt.vector3d(0,1500,0)
                        scale: Qt.vector3d(rocket_frame.d, rocket_frame.h_nose, rocket_frame.d)
                        materials: DefaultMaterial { diffuseColor: "#d9d9d9" }
                    }
