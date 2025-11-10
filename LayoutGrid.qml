@@ -19,10 +19,6 @@ GridLayout {
         Layout.fillWidth: true; Layout.fillHeight: true
         Panel_IMU_And_Kalman_Data {
             anchors.fill: parent
-            // IMU demo values
-            x_axis: 10; y_axis: 11; z_axis: 12
-            roll: 20; pitch: 30; yaw: 40
-            raw_angle: 10; filtered_angle: 20
         }
     }
 

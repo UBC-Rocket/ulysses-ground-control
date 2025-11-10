@@ -4,16 +4,16 @@ import "Items"
 BasePanel {
     id: panel_Baro_And_Telemetry
 
-    //Barometer Data
-    property double pressure
-    property double altitude
+    // Barometer Data
+    property double pressure: sensorData.pressure
+    property double altitude: sensorData.altitude
 
-    //Telemetry Data
-    property double velocity
-    property double temperature
-    property double signals
-    property double battery
-
+    // Telemetry Data
+    property double velocity: sensorData.velocity
+    property double temperature: sensorData.temperature
+    property double signals: sensorData.signal
+    property double battery: sensorData.battery
+    
     BaseHeader {
         id:header
         headerText: "Barometric and Telemetry Data"
