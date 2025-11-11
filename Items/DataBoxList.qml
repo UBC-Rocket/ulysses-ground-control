@@ -8,6 +8,7 @@ Rectangle {
     property list<string> dataNames
     property list<double> dataValues
 
+    color: "transparent"
 
     Repeater {
         model: size

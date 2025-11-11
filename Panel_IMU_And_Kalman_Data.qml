@@ -44,7 +44,7 @@ BasePanel {
 
         DataBoxList {
             anchors.top: subheader_acc.bottom
-            width: panel_IMU_and_Kalman.width;
+            width: panel_IMU_and_Kalman.width
 
             size: 3
             dataNames: ["X-AXIS", "Y-AXIS", "Z-AXIS"]
