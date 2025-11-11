@@ -12,6 +12,7 @@ BasePanel {
     BaseHeader {
         id:header
         headerText: "Rocket Visualization"
+        defaultSize: 2
     }
 
     Rectangle {

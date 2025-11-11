@@ -16,7 +16,7 @@ BasePanel {
 
     BaseHeader {
         id:header
-        headerText: "Barometric and Telemetry Data"
+        headerText: "Barometric/Telemetry"
     }
 
     Rectangle {
@@ -24,9 +24,8 @@ BasePanel {
 
         height: (parent.height-header.height)/3
         anchors {
-            top: parent.top
+            top: header.bottom
             left: parent.left
-            topMargin: header.height
             leftMargin: header.anchors.leftMargin
         }
 
@@ -35,7 +34,6 @@ BasePanel {
             width: panel_Baro_And_Telemetry.width;
 
             size: 2
-            boxHeight: 50
             dataNames: ["PRESSURE (hPa)", "ALTITUDE (m)"]
             dataValues: [pressure, altitude]
         }
@@ -56,7 +54,6 @@ BasePanel {
             width: panel_Baro_And_Telemetry.width;
 
             size: 2
-            boxHeight: 50
             dataNames: ["VELOCITY (km/h)", "TEMP (C)"]
             dataValues: [velocity, temperature]
         }
@@ -77,7 +74,6 @@ BasePanel {
             width: panel_Baro_And_Telemetry.width;
 
             size: 2
-            boxHeight: 50
             dataNames: ["SIGNAL (%)", "BATTERY (%)"]
             dataValues: [signals, battery]
         }

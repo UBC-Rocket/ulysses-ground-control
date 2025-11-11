@@ -2,9 +2,10 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Controls.Basic as Basic   // skinnable controls
+import "Items"
 
 Rectangle {
-    id: panel
+    id: panel_System_Alert
     color: "#1F2937"
     border.color: "#2d3748"
     border.width: 4
@@ -13,31 +14,23 @@ Rectangle {
     width:  (parent.parent.width  - 20)/2  - 5
 
     // ---------- Header (left aligned) ----------
-    RowLayout {
-        id: headerRow
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.margins: 12
-        spacing: 8
+    BaseHeader {
+        id: header
+        headerText: "System Alert"
+        defaultSize: 2
 
-        Text {
-            id: header_System_Alert
-            text: "System Alert"
-            color: "#93C5FD"
-            font.pixelSize: 20
-            font.bold: true
-        }
-
-        Item { Layout.fillWidth: true }
-
-        // compact CLEAR button
         Basic.Button {
             id: clearBtn
+
+            anchors {
+                top: parent.top
+                right: parent.right
+                rightMargin: 30
+            }
             text: "CLEAR"
             hoverEnabled: true
             padding: 8
-            font.pixelSize: 14
+            font.pixelSize: parent.width/150 + panel_System_Alert.height/50 + 3
             background: Rectangle {
                 radius: 8
                 color: clearBtn.down    ? "#20375f"
@@ -60,7 +53,7 @@ Rectangle {
     Rectangle {
         id: inner
         anchors {
-            top: headerRow.bottom
+            top: header.bottom
             left: parent.left
             right: parent.right
             bottom: parent.bottom

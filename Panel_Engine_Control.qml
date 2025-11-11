@@ -16,18 +16,18 @@ BasePanel {
     Rectangle {
         id: throttle_and_fuel
 
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.topMargin: header.height
-        anchors.leftMargin: header.anchors.leftMargin
-        height: 200
+        height: (parent.height-header.height)/3
+        anchors {
+            top: header.bottom
+            left: parent.left
+            leftMargin: header.anchors.leftMargin
+        }
 
         DataBoxList {
             anchors.top: throttle_and_fuel.top
             width: panel_Engine.width;
 
             size: 2
-            boxHeight: 70
             dataNames: ["THROTTLE (%)", "FUEL (%)"]
             dataValues: [throttle, fuel]
         }

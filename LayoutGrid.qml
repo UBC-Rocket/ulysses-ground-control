@@ -72,6 +72,8 @@ GridLayout {
         BaseResize {
             grid: grid
             panel: parent
+            minimumWidth: resolution * 3/5
+            minimumHeight: resolution * 4/5
         }
     }
 
@@ -87,6 +89,8 @@ GridLayout {
         BaseResize {
             grid: grid
             panel: parent
+            minimumWidth: resolution * 5/10
+            minimumHeight: resolution * 3/5
         }
     }
 
@@ -102,6 +106,8 @@ GridLayout {
         BaseResize {
             grid: grid
             panel: parent
+            minimumWidth: resolution * 3/5
+            minimumHeight: resolution * 4/5
         }
     }
 
@@ -119,6 +125,8 @@ GridLayout {
         BaseResize {
             grid: grid
             panel: parent
+            minimumWidth: resolution * 3/5
+            minimumHeight: resolution * 3/5
         }
     }
 
@@ -134,6 +142,8 @@ GridLayout {
         BaseResize {
             grid: grid
             panel: parent
+            minimumWidth: resolution * 3/5
+            minimumHeight: resolution * 3/5
         }
     }
 
@@ -149,6 +159,8 @@ GridLayout {
         BaseResize {
             grid: grid
             panel: parent
+            minimumWidth: resolution * 3/5
+            minimumHeight: resolution * 3/5
         }
     }
 

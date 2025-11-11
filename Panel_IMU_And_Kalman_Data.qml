@@ -19,7 +19,7 @@ BasePanel {
 
     BaseHeader {
         id:header
-        headerText: "IMU and Kalman Data"
+        headerText: "IMU and Kalman"
     }
 
     Rectangle {
@@ -27,18 +27,17 @@ BasePanel {
 
         height: (parent.height-header.height)/3
         anchors {
-            top: parent.top
+            top: header.bottom
             left: parent.left
-            topMargin: header.height
             leftMargin: header.anchors.leftMargin
         }
 
         Text {
             id: subheader_acc
             text: "Accelerometer (m/s^2)"
-            font.pixelSize: 18
+            font.pixelSize: 10 + panel_IMU_and_Kalman.width/35
             color: "#D1D5DB"
-            height: 40
+            height: parent.height/3
             y: 0
         }
 
@@ -65,15 +64,15 @@ BasePanel {
         Text {
             id: subheader_gyro
             text: "Gyroscope (deg/s)"
-            font.pixelSize: 18
+            font.pixelSize: 10 + panel_IMU_and_Kalman.width/35
             color: "#D1D5DB"
-            height: 40
+            height: parent.height/3
             y: 0
         }
 
         DataBoxList {
             anchors.top: subheader_gyro.bottom
-            width: panel_IMU_and_Kalman.width;
+            width: panel_IMU_and_Kalman.width
 
             size: 3
             dataNames: ["ROLL", "PITCH", "YAW"]
@@ -94,15 +93,15 @@ BasePanel {
         Text {
             id: subheader_angles
             text: "Angles (deg)"
-            font.pixelSize: 18
+            font.pixelSize: 10 + panel_IMU_and_Kalman.width/35
             color: "#D1D5DB"
-            height: 40
+            height: parent.height/3
             y: 0
         }
 
         DataBoxList {
             anchors.top: subheader_angles.bottom
-            width: panel_IMU_and_Kalman.width;
+            width: panel_IMU_and_Kalman.width
 
             size: 2
             dataNames: ["RAW ANGLE", "FILTERED ANGLE"]

@@ -6,7 +6,7 @@ Rectangle {
     property int sections       //How many boxes are together
     property int section_num    //Which box is this one
 
-    height: 50
+    height: parent.height/2
     width: (parent.width-18*sections)/sections
     x: (section_num-1) * (width+10)
     radius: 5
@@ -18,11 +18,11 @@ Rectangle {
         id: name
 
         text: dataName
-        font.pixelSize: 14
+        font.pixelSize: parent.width / sections / 13 + 4 * sections
         color: "#729AAF"
 
         anchors.centerIn: parent
-        anchors.verticalCenterOffset: -10
+        anchors.verticalCenterOffset: -10 + parent.height/20
     }
 
     Text {
@@ -30,7 +30,7 @@ Rectangle {
 
         anchors.top: name.bottom
         text: dataValue
-        font.pixelSize: 14
+        font.pixelSize: parent.width / sections / 13 + 4 * sections
         color: "#729AAF"
 
         anchors.horizontalCenter: parent.horizontalCenter;
