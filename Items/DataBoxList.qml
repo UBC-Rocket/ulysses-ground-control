@@ -4,10 +4,11 @@ Rectangle {
     anchors.left: parent.left
 
     property int size
-    property int boxHeight: 50
+    property int boxHeight: parent.height/2.3
     property list<string> dataNames
     property list<double> dataValues
 
+    color: "transparent"
 
     Repeater {
         model: size

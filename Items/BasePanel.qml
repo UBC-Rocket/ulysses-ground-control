@@ -19,7 +19,4 @@ Rectangle {
     Layout.margins: 2
     Layout.fillWidth: true
     Layout.fillHeight: true
-    Layout.minimumWidth: width
-    Layout.minimumHeight: height
-
 }
