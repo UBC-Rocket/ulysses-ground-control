@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Controls.Basic as Basic   // skinnable controls
-import "Items"
+import "../Items"
 
 Rectangle {
     id: panel_System_Alert

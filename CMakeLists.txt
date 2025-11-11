@@ -18,18 +18,18 @@ qt_add_qml_module(appulysses_ground_control
 
     QML_FILES
         Main.qml
-        Header.qml
         Shortcuts.qml
         LayoutGrid.qml
 
-        Panel_Test.qml
-        Panel_IMU_And_Kalman_Data.qml
-        Panel_Control.qml
-        Panel_Rocket_Visualization.qml
-        Panel_Engine_Control.qml
-        Panel_Baro_And_Telemetry_Data.qml
-        Panel_System_Alert.qml
+        Panels/Panel_Test.qml
+        Panels/Panel_IMU_And_Kalman_Data.qml
+        Panels/Panel_Control.qml
+        Panels/Panel_Rocket_Visualization.qml
+        Panels/Panel_Engine_Control.qml
+        Panels/Panel_Baro_And_Telemetry_Data.qml
+        Panels/Panel_System_Alert.qml
 
+        Items/Header.qml
         Items/BaseHeader.qml
         Items/BasePanel.qml
         Items/Data.qml

@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import "Items"
+import "../Items"
 
 BasePanel {
     id: panel_Control

@@ -1,5 +1,5 @@
 import QtQuick
-import "Items"
+import "../Items"
 
 BasePanel {
     id: panel_Baro_And_Telemetry

@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import "Items"
+import "../Items"
 
 BasePanel {
     //Reset the Panel
