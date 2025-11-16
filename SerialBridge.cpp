@@ -6,11 +6,7 @@
 #include <QThread>
 
 SerialBridge::SerialBridge(QObject* parent) : QObject(parent) {
-    refreshPorts(); // Build the initial COM list so the UI has a correct starting point.
-    connect(&m_rx, &QSerialPort::readyRead, this, &SerialBridge::onRxReadyRead); // Handle incoming bytes as soon as the OS signals data is ready.
-
-    connect(&m_tx, &QSerialPort::errorOccurred, this, &SerialBridge::onTxErrorOccurred); // Report TX-side driver/connection errors to the UI.
-    connect(&m_rx, &QSerialPort::errorOccurred, this, &SerialBridge::onRxErrorOccurred); // Report RX-side driver/connection errors to the UI.
+    refreshPorts(); // Build the initial COM list so the UI has something to show.
 }
 
 bool SerialBridge::looksLikeRadio(const QSerialPortInfo& info) {
@@ -19,174 +15,286 @@ bool SerialBridge::looksLikeRadio(const QSerialPortInfo& info) {
     const QString desc = info.description().toLower();
     const QString mfg = info.manufacturer().toLower();
 
+    // Quickly reject typical Bluetooth virtual COM ports.
     if (desc.contains("bluetooth") || mfg.contains("bluetooth"))
-        return false; // Filter out common Bluetooth SPP virtual COM ports immediately.
+        return false;
 
+    // Known USB–UART bridge IDs commonly used for RFD/SiK radios.
     if ((vid == 0x0403 && pid == 0x6001) ||   // FTDI FT232R
         (vid == 0x10C4 && pid == 0xEA60)) {   // SiLabs CP210x
-        return true; // Known USB–UART bridges frequently used by RFD/SiK radios.
+        return true;
     }
 
+    // Fuzzy match against common USB–UART manufacturer strings.
     if (desc.contains("ftdi") || desc.contains("silicon labs") ||
         mfg.contains("ftdi")  || mfg.contains("silicon labs"))
-        return true; // Heuristic accept when descriptive text matches typical radio chipsets.
+        return true;
 
-    return false; // Unknown adapter: leave out until an active probe confirms otherwise.
+    // Anything else is ignored until an explicit probe says otherwise.
+    return false;
 }
 
 bool SerialBridge::probeRadio_AT(QSerialPort& port) {
-    port.readAll();
+    port.readAll();                 // Drop any stale bytes.
     port.waitForReadyRead(50);
-    QThread::msleep(1000); // SiK/AT guard time: enforce ~1s of silence before sending "+++".
+    QThread::msleep(1000);          // Enforce SiK guard time (~1s silence) before "+++".
 
     if (port.write("+++", 3) != 3)
-        return false; // Could not inject the AT escape sequence into the driver.
+        return false;               // Can't even send the escape sequence.
 
-    port.write("ATO"); // Minimal exit to data mode (UI-verification path; no OK parsing here).
-    return true; // For your current verification use-case, treat reaching this point as success.
+    port.write("ATO");              // Minimal data-mode exit; we don't parse the reply here.
+    return true;                    // For now, reaching this point is treated as “probe OK”.
 }
 
 void SerialBridge::refreshPorts() {
     QStringList list;
     for (const QSerialPortInfo& info : QSerialPortInfo::availablePorts()) {
         if (looksLikeRadio(info))
-            list << info.portName(); // Keep only ports that pass the passive “looks like radio” filter.
+            list << info.portName(); // Only keep ports that pass the heuristic filter.
     }
-    if (list != m_ports) {       // Only notify when the set actually changed to avoid needless QML churn.
+
+    // Only notify QML if the list actually changed (prevents unnecessary UI churn).
+    if (list != m_ports) {
         m_ports = list;
-        emit portsChanged();     // Drives the ComboBox models bound to bridge.ports.
+        emit portsChanged();
     }
 }
 
-// configuration of connect port
-bool SerialBridge::openPort(QSerialPort& port, const QString& name, int baud) {
+SerialBridge::PortBundle SerialBridge::bundle(int which) {
+    if (which == 1) {
+        return PortBundle{ m_p1, m_rx1_buffer, m_readyConnect1, m_error1 };
+    } else {
+        return PortBundle{ m_p2, m_rx2_buffer, m_readyConnect2, m_error2 };
+    }
+}
 
-    if (port.isOpen()) port.close(); // Reset the device so subsequent configuration reliably applies.
+bool SerialBridge::openPort(QSerialPort& port, const QString& name, int baud) {
+    if (port.isOpen())
+        port.close(); // Ensure we start from a clean state.
 
     port.setPortName(name);
     port.setBaudRate(baud);
     port.setDataBits(QSerialPort::Data8);
     port.setParity(QSerialPort::NoParity);
     port.setStopBits(QSerialPort::OneStop);
-    port.setFlowControl(QSerialPort::NoFlowControl); // Change to HardwareControl if using RTS/CTS wiring.
+    port.setFlowControl(QSerialPort::NoFlowControl); // Change if using hardware flow control.
 
     if (!port.open(QIODevice::ReadWrite)) {
-        emitError(QStringLiteral("Failed to open %1: %2").arg(name, port.errorString())); // Surface OS-level open failure.
+        emitError(QStringLiteral("Failed to open %1: %2").arg(name, port.errorString()));
         return false;
     }
-    return true; // Successfully opened and configured; ready for IO.
-}
-
-bool SerialBridge::connectTxPort(const QString& name, int baud) {
-    const QString prevName = m_tx.portName(); // Preserve pre-change values to issue precise NOTIFY signals.
-    const int prevBaud = txBaud();
-
-    if (!openPort(m_tx, name, baud)) return false;   // Attempt to open and configure TX.
-
-    // Notify QML bindings so labels/titles update
-    emit txConnectedChanged();                       // Toggle connection state flag for QML bindings.
-    if (m_tx.portName() != prevName) emit txPortNameChanged(); // Emit only on real value change.
-    if (txBaud() != prevBaud)        emit txBaudChanged();     // Emit only on real value change.
-
-    if (!probeRadio_AT(m_tx)) emit butTxNotRadioModem(); // Inform UI if the device does not behave like a radio.
     return true;
 }
 
-bool SerialBridge::connectRxPort(const QString& name, int baud)
-{
-    const QString prevName = m_rx.portName(); // Preserve pre-change values to issue precise NOTIFY signals.
-    const int prevBaud = rxBaud();
+bool SerialBridge::connectPort(int which, const QString& name, int baud) {
+    // Prevent assigning the same OS port to both “P1” and “P2”.
+    if (which == 1 && m_p2.isOpen() && m_p2.portName() == name) {
+        emitError(QStringLiteral("Port %1 is already assigned to P2. Disconnect P2 first.").arg(name));
+        return false;
+    }
+    if (which == 2 && m_p1.isOpen() && m_p1.portName() == name) {
+        emitError(QStringLiteral("Port %1 is already assigned to P1. Disconnect P1 first.").arg(name));
+        return false;
+    }
 
-    if (!openPort(m_rx, name, baud)) return false; // Open and configure RX.
+    auto b = bundle(which);
+    if (!openPort(b.port, name, baud))
+        return false;
 
-    emit rxConnectedChanged();                      // Toggle connection state flag for QML bindings.
-    if (m_rx.portName() != prevName) emit rxPortNameChanged(); // Emit only on real value change.
-    if (rxBaud() != prevBaud)        emit rxBaudChanged();     // Emit only on real value change.
+    emit connectedChanged(which, true);
+    emit portNameChanged(which);
+    emit baudChanged(which);
 
-    if (!probeRadio_AT(m_rx)) emit butRxNotRadioModem(); // Inform UI if the device does not behave like a radio.
+    // Attach RX handlers for this port (can listen on both ports).
+    attachRx(which);
+
+    // Light sanity check that this behaves like a radio modem.
+    if (!probeRadio_AT(b.port))
+        emit butNotRadioModem(which);
+
     return true;
 }
 
-void SerialBridge::disconnectTxPort() {
-    const QString prevName = m_tx.portName(); // Snapshot values before closing so we can detect change.
-    const int prevBaud = txBaud();
+void SerialBridge::disconnectPort(int which) {
+    auto b = bundle(which);
+    if (b.port.isOpen()) {
+        b.port.close();
+    }
 
-    if (m_tx.isOpen()) m_tx.close();                 // Close immediately to release the OS handle.
-    m_tx.setPortName(QString());                     // Clear the visible name to reflect a disconnected state.
-
-    emit txConnectedChanged();                       // Notify bound UI that connection state changed.
-    if (m_tx.portName() != prevName) emit txPortNameChanged(); // Name typically clears on disconnect.
-    if (txBaud() != prevBaud)        emit txBaudChanged();     // Some drivers report baud differently after close.
+    // Remove signal connections so we don’t read from a closed port.
+    detachRx(which);
+    emit connectedChanged(which, false);
 }
 
-void SerialBridge::disconnectRxPort()
-{
-    const QString prevName = m_rx.portName(); // Snapshot values before closing so we can detect change.
-    const int prevBaud = rxBaud();
-
-    if (m_rx.isOpen()) m_rx.close();          // Stop reading and free OS resources.
-    m_rx.setPortName(QString());              // Clear visible name for a clean disconnected state.
-
-    emit rxConnectedChanged();                // Notify bound UI that connection state changed.
-    if (m_rx.portName() != prevName) emit rxPortNameChanged(); // Name typically clears on disconnect.
-    if (rxBaud() != prevBaud)        emit rxBaudChanged();     // Drivers may zero/mutate baud on close.
-}
-
-bool SerialBridge::sendText(const QString& text) {
-    if (!m_tx.isOpen()) {
-        emitError(QStringLiteral("Port is not open")); // Guard: refuse writes if TX isn’t connected.
+bool SerialBridge::setTxTo(int which) {
+    if (which != 1 && which != 2) {
+        emitError("setTxTo: which must be 1 or 2");
         return false;
     }
 
-    QByteArray data = text.toUtf8();
-    if (!data.endsWith('\n')) data.append('\n'); // Ensure newline framing so the peer can split by lines.
-
-    qint64 written = m_tx.write(data);
-    if (written == -1) {
-        emitError(QStringLiteral("Write failed: %1").arg(m_tx.errorString())); // Immediate driver-layer write failure.
+    if (!bundle(which).port.isOpen()) {
+        emitError("setTxTo: selected port is not open");
         return false;
     }
 
-    if (!m_tx.waitForBytesWritten(50)) {
-        emitError(QStringLiteral("Write timeout (no bytes flushed)")); // Treat stalled flush as an error for reliability.
-        return false;
-    }
+    // No change → nothing to do.
+    if (m_txTo == which)
+        return true;
 
-    return true; // Data accepted by the driver; user buffer flushed or in progress.
+    m_txTo = which;
+    emit txToChanged();
+    return true;
 }
 
-void SerialBridge::onRxReadyRead() {
-    m_rxbuffer.append(m_rx.readAll()); // Accumulate fragments; readyRead can deliver partial frames.
+bool SerialBridge::setRxFrom(int which) {
+    if (which != 1 && which != 2) {
+        emitError("setTxTo: which must be 1 or 2");
+        return false;
+    }
+
+    if (!isConnected(which)) {
+        emitError("setRxFrom: selected port is not open");
+        return false;
+    }
+
+    if (m_rxFrom == which)
+        return true;
+
+    // Switch RX source and move handlers over to the new port.
+    detachRx(which);
+    m_rxFrom = which;
+    attachRx(which);
+    emit rxFromChanged();
+    return true;
+}
+
+void SerialBridge::attachRx(int which) {
+    auto b = bundle(which);
+
+    // Reconnect error handler for this port.
+    QObject::disconnect(b.errorConnect);
+    b.errorConnect = connect(
+        &b.port, &QSerialPort::errorOccurred, this,
+        [this, which](QSerialPort::SerialPortError e) { handleError(which, e); }
+        );
+
+    // Reconnect readyRead handler for this port.
+    QObject::disconnect(b.readyConnect);
+    b.readyConnect = connect(
+        &b.port, &QIODevice::readyRead, this,
+        [this, which] { handleReadyRead(which); }
+        );
+}
+
+void SerialBridge::detachRx(int which) {
+    auto b = bundle(which);
+    QObject::disconnect(b.readyConnect);
+    QObject::disconnect(b.errorConnect);
+}
+
+void SerialBridge::beginRxPause(int ms) {
+    m_rxPaused = true;
+    m_rxPauseMs = ms;
+    m_rxPauseTimer.restart(); // Start timing the pause window.
+}
+
+void SerialBridge::endRxPause() {
+    m_rxPaused = false;
+    m_rxPauseMs = 0;
+}
+
+bool SerialBridge::sendText(int which, const QString& text) {
+    auto b = bundle(which);
+    if (!b.port.isOpen()) {
+        emitError(QString("sendTextOn: P%1 not open").arg(which));
+        return false;
+    }
+
+    // If TX and RX share the same physical port, we temporarily pause RX while we TX.
+    const bool shared = (which == m_rxFrom);
+
+    QString line = text;
+    if (!line.endsWith('\n'))
+        line.append('\n'); // Normalize to LF-terminated lines for the receiver/parser.
+
+    const QByteArray bytes = line.toUtf8();
+
+    int estMs = 0;
+    if (shared) {
+        // Rough TX-time estimate: bytes * 10 bits / baud → ms, clamped to a small range.
+        const int baud = b.port.baudRate();
+        const int nbytes = bytes.size();
+        double t_ms = (baud > 0)
+                          ? (double(nbytes) * 10.0 * 1000.0 / double(baud))
+                          : 2.0;
+        estMs = qBound(1, int(qCeil(t_ms)) + 1, 10);
+        beginRxPause(estMs);
+    }
+
+    const qint64 n = b.port.write(bytes);
+    if (n < 0) {
+        emitError(QStringLiteral("Write failed on P%1: %2").arg(which).arg(b.port.errorString()));
+        if (shared)
+            endRxPause();
+        return false;
+    }
+
+    b.port.flush();
+    b.port.waitForBytesWritten(10); // Short blocking wait to push bytes out.
+
+    if (shared) {
+        endRxPause();
+        parseBufferedLines(which);  // Process anything that arrived during the pause.
+    }
+    return true;
+}
+
+void SerialBridge::handleReadyRead(int which) {
+    auto b = bundle(which);
+    b.rxBuf.append(b.port.readAll()); // Append any newly arrived data into the buffer.
+
+    // While TX pause is active we only accumulate data, we don't parse lines yet.
+    if (isRxPause())
+        return;
+
+    parseBufferedLines(which);
+}
+
+void SerialBridge::parseBufferedLines(int which) {
+    auto b = bundle(which);
+
+    // Grab any remaining bytes in case readyRead fired again between calls.
+    b.rxBuf.append(b.port.readAll());
 
     int idx;
-    while ((idx = m_rxbuffer.indexOf('\n')) != -1) { // Extract each complete LF-terminated line.
-        QByteArray line = m_rxbuffer.left(idx);
+    // Consume full lines terminated by '\n'; keep partial line in buffer.
+    while ((idx = b.rxBuf.indexOf('\n')) != -1) {
+        QByteArray line = b.rxBuf.left(idx);
 
-        if (!line.isEmpty() && line.endsWith('\r')) line.chop(1); // Convert CRLF → LF by trimming trailing CR.
-        m_rxbuffer.remove(0, idx+1); // Drop the consumed bytes (including '\n'); keep any trailing partial frame.
+        // Convert CRLF → LF by dropping trailing '\r'.
+        if (!line.isEmpty() && line.endsWith('\r')) {
+            line.chop(1);
+        }
 
-        QString text = QString::fromUtf8(line);      // Prefer UTF-8 to keep non-ASCII intact.
-        if (text.isNull()) text = QString::fromLatin1(line); // Fallback so binary-ish data still displays legibly.
+        // Remove this line (and its '\n') from the buffer.
+        b.rxBuf.remove(0, idx + 1);
 
-        emit rxTextReceived(text); // Emit one logical line to QML; easy to append and log in the UI.
+        // Prefer UTF-8; fall back to Latin-1 if decoding fails.
+        QString text = QString::fromUtf8(line);
+        if (text.isNull()) {
+            text = QString::fromLatin1(line);
+        }
+
+        // Emit a clean logical line to whoever is listening (QML, alarm system, etc.).
+        emit textReceivedFrom(which, text);
     }
 }
 
-void SerialBridge::onTxErrorOccurred(QSerialPort::SerialPortError e) {
-    // Suppress benign timeouts (common during guard time / short polling) to avoid noisy popups.
+void SerialBridge::handleError(int which, QSerialPort::SerialPortError e) {
+    // Ignore benign notifications.
     if (e == QSerialPort::NoError || e == QSerialPort::TimeoutError)
         return;
-    emitError(m_tx.errorString()); // Forward meaningful TX errors (disconnects, access, framing, etc.).
-}
 
-void SerialBridge::onRxErrorOccurred(QSerialPort::SerialPortError e) {
-    // Same timeout suppression on RX path to keep UI signal-only for real failures.
-    if (e == QSerialPort::NoError || e == QSerialPort::TimeoutError)
-        return;
-    emitError(m_rx.errorString()); // Forward meaningful RX errors.
+    auto& p = (which == 1) ? m_p1 : m_p2;
+    emitError(QStringLiteral("Serial error on P%1: %2").arg(which).arg(p.errorString()));
 }
-
-void SerialBridge::emitError(const QString& msg) {
-    emit errorMessage(msg); // Centralized error reporting; QML listens to this single signal.
-}
-

@@ -10,71 +10,66 @@ class CommandSender : public QObject {
     Q_OBJECT
 
 public:
+    /// Construct a sender bound to a SerialBridge (non-owning).
     explicit CommandSender(SerialBridge* bridge, QObject* parent = nullptr);
 
-    /**
-     * @brief sendCode
-     * Sends a command string through the bound SerialBridge (typically out the TX port).
-     * Implementations commonly validate/normalize @p code, then emit messageSent()/errorOccurred().
-     * @param code Command payload to transmit (format decided by your application/protocol).
-     * @return true on successful dispatch; false if bridge is null, TX not open, or validation fails.
-     */
-    Q_INVOKABLE bool sendCode(const QString& code);
+    /// Send a single command string out via the given channel on the bridge.
+    Q_INVOKABLE bool sendCode(int which, const QString& code);
 
-    /*
-     * the methods to send a 50Hz string signal for tests.
-     * (not a part of GCS)
-     */
-    Q_INVOKABLE void startPeriodic(const QString& code, int hz = 50);
-    Q_INVOKABLE void stopPeriodic();
-    Q_INVOKABLE bool isPeriodicRunning() const { return m_timer.isActive(); }
+    // -----------------------
+    // Periodic test helpers
+    // -----------------------
+
+    /// Start sending a command at a fixed frequency (Hz) on the given channel.
+    Q_INVOKABLE void startPeriodic(int which, const QString& code, int hz = 50);
+
+    /// Stop periodic sending on the given channel.
+    Q_INVOKABLE void stopPeriodic(int which);
+
+    /// Return true if periodic sending is active on the given channel.
+    Q_INVOKABLE bool isPeriodicRunning(int which) const;
 
 signals:
     // -----------------------
     // App-level signals
     // -----------------------
 
-    /**
-     * @brief messageSent
-     * Emitted after a command is successfully handed off for transmission (echoes the payload).
-     */
+    /// Emitted after a command is successfully dispatched (echoes payload).
     void messageSent(const QString payload);
 
-    /**
-     * @brief errorOccurred
-     * Emitted when sending fails (e.g., no bridge, port closed, or other validation/runtime error).
-     */
+    /// Emitted when sending fails (invalid channel, closed port, no bridge, etc.).
     void errorOccurred(const QString error);
 
 public slots:
-    /**
-     * @brief setBridge
-     * Late-bind or swap the target SerialBridge instance at runtime; object is not owned by CommandSender.
-     * @param bridge The transport to use for subsequent sendCode() calls.
-     */
-    void setBridge(SerialBridge* bridge) {m_bridge = bridge;}
-
-private slots:
-    /**
-     * @brief onPeriodicTimeout
-     * Internal slot fired by @ref m_timer at the configured rate.
-     * Sends @ref m_periodicPayload via sendCode()/bridge and handles failures.
-     */
-    void onPeriodicTimeout();
+    /// Set or swap the SerialBridge used for all subsequent sends (non-owning).
+    void setBridge(SerialBridge* bridge) { m_bridge = bridge; }
 
 private:
-    /**
-     * @brief setupPeriodicTimer
-     * Configures @ref m_timer with the desired @p type (default PreciseTimer),
-     * connects its timeout() to @ref onPeriodicTimeout, and leaves it stopped.
-     * Call m_timer.start(interval_ms) elsewhere to begin ticking.
-     */
-    void setupPeriodicTimer(Qt::TimerType type = Qt::PreciseTimer);
+    /// Per-channel periodic sending state (timer + payload + rate).
+    struct PeriodicChan {
+        QTimer timer;
+        QString payload;
+        int hz = 0;
+    };
 
-    SerialBridge* m_bridge = nullptr; ///< Non-owning transport pointer; lifetime managed externally.
-    QTimer m_timer;                   ///< Drives periodic sends when active.
-    QString m_periodicPayload;        ///< The command payload dispatched on each timer tick.
+    /// Check that the channel index is valid (1 or 2).
+    static inline bool validWhich(int which) {
+        return which == 1 || which == 2;
+    }
 
+    /// Non-const accessor to channel state (1 or 2).
+    PeriodicChan& chan(int which) {
+        return (which == 1) ? m_ch1 : m_ch2;
+    }
+
+    /// Const accessor to channel state (1 or 2).
+    const PeriodicChan& chan(int which) const {
+        return (which == 1) ? m_ch1 : m_ch2;
+    }
+
+    SerialBridge* m_bridge = nullptr; ///< Serial transport used to send commands.
+    PeriodicChan m_ch1;               ///< Periodic send state for channel 1.
+    PeriodicChan m_ch2;               ///< Periodic send state for channel 2.
 };
 
 #endif // COMMANDSENDER_H

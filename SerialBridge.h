@@ -5,39 +5,15 @@
 #include <QObject>
 #include <QSerialPort>
 #include <QSerialPortInfo>
+#include <QTimer>
 
-/**
- * @brief SerialBridge
- * QML-friendly wrapper that manages TWO serial ports at once:
- *  - m_tx : port used for transmitting (we write to it)
- *  - m_rx : port used for receiving (we read from it)
- * It also exposes properties/signals so a Qt Quick UI can bind to connection
- * state, port names, baud rates, and incoming text lines.
- */
 class SerialBridge : public QObject {
     Q_OBJECT
-
-    // Exposes the current list of available serial port names (e.g., "COM7", "COM8").
-    // Call refreshPorts() to rescan; emits portsChanged when the list changes.
-    Q_PROPERTY(QStringList ports READ ports NOTIFY portsChanged)
-
-    // Connection state of each side; true when that port is open.
-    Q_PROPERTY(bool txConnected READ txConnected NOTIFY txConnectedChanged)
-    Q_PROPERTY(bool rxConnected READ rxConnected NOTIFY rxConnectedChanged)
-
-    // The current OS port names bound to each side (empty if not connected).
-    Q_PROPERTY(QString txPortName READ txPortName NOTIFY txPortNameChanged)
-    Q_PROPERTY(QString rxPortName READ rxPortName NOTIFY rxPortNameChanged)
-
-    // The current UART baud rates applied to each side (valid when connected).
-    Q_PROPERTY(int txBaud READ txBaud NOTIFY txBaudChanged)
-    Q_PROPERTY(int rxBaud READ rxBaud NOTIFY rxBaudChanged)
 
 public:
     /**
      * @brief SerialBridge constructor
-     * Initializes the object and typically wires up signals/slots in the .cpp.
-     * The implementation also calls refreshPorts() to populate the initial port list.
+     * Creates the bridge object and (in .cpp) wires up serial signals and does initial refreshPorts().
      */
     explicit SerialBridge(QObject* parent = nullptr);
 
@@ -45,177 +21,157 @@ public:
     // QML-callable API
     // -----------------------
 
-    /**
-     * @brief refreshPorts
-     * Rescans the system for available serial ports using QSerialPortInfo::availablePorts().
-     * If the list differs from the cached list, updates it and emits portsChanged().
-     */
+    /// Rescan system serial ports and update the cached port list (ports()).
     Q_INVOKABLE void refreshPorts();
 
-    /**
-     * @brief connectTxPort
-     * Opens and configures the TX (transmit) serial port with the given name and baud.
-     * On success, emits txConnectedChanged(), and if applicable txPortNameChanged()/txBaudChanged().
-     * @param name     OS port name (e.g., "COM7" or "/dev/ttyUSB0")
-     * @param baudRate UART baud rate (e.g., 57600, 115200)
-     * @return true if opened successfully; false on error (error surfaced via errorMessage()).
-     */
-    Q_INVOKABLE bool connectTxPort(const QString& name, int baudRate);
+    /// Open port 1 or 2 with the given name/baud; returns true on success.
+    Q_INVOKABLE bool connectPort(int which, const QString& name, int baudRate);
 
-    /**
-     * @brief connectRxPort
-     * Opens and configures the RX (receive) serial port with the given name and baud.
-     * On success, emits rxConnectedChanged(), and if applicable rxPortNameChanged()/rxBaudChanged().
-     * @param name     OS port name (e.g., "COM8" or "/dev/ttyUSB1")
-     * @param baudRate UART baud rate (e.g., 57600, 115200)
-     * @return true if opened successfully; false on error (error surfaced via errorMessage()).
-     */
-    Q_INVOKABLE bool connectRxPort(const QString& name, int baudRate);
+    /// Close port 1 or 2 if open and clean up handlers.
+    Q_INVOKABLE void disconnectPort(int which);
 
-    /**
-     * @brief disconnectTxPort
-     * Closes the TX serial port if open, clears its stored name for UI aesthetics,
-     * and emits txConnectedChanged(); also emits txPortNameChanged()/txBaudChanged() if values changed.
-     */
-    Q_INVOKABLE void disconnectTxPort();
+    /// Set which port index is used as the TX source; emits txToChanged() on success.
+    Q_INVOKABLE bool setTxTo(int which);
 
-    /**
-     * @brief disconnectRxPort
-     * Closes the RX serial port if open, clears its stored name for UI aesthetics,
-     * and emits rxConnectedChanged(); also emits rxPortNameChanged()/rxBaudChanged() if values changed.
-     */
-    Q_INVOKABLE void disconnectRxPort();
+    /// Set which port index is used as the RX source; emits rxFromChanged() on success.
+    Q_INVOKABLE bool setRxFrom(int which);
 
-    /**
-     * @brief sendText
-     * Sends a UTF-8 encoded line out of the TX port. Appends '\n' if missing so the receiver
-     * can parse line-by-line. Waits briefly for bytesWritten for better UX.
-     * @param text The text payload to send.
-     * @return true on success; false if TX is not open or write/flush fails (errorMessage() emitted).
-     */
-    Q_INVOKABLE bool sendText(const QString& text);
+    /// Send a line of text out through the selected port (1 or 2); returns true on success.
+    Q_INVOKABLE bool sendText(int which, const QString& text);
 
     // -----------------------
     // Property getters
     // -----------------------
 
-    /// Returns the current cached list of available serial port names.
+    /// Return the current list of available OS serial port names.
     Q_INVOKABLE QStringList ports() const { return m_ports; }
 
-    /// True if the TX serial port (m_tx) is open.
-    bool txConnected() const { return m_tx.isOpen(); }
+    /// Return true if the given port (1 or 2) is currently open.
+    Q_INVOKABLE bool isConnected(int which) const {
+        return (which == 1) ? m_p1.isOpen() : m_p2.isOpen();
+    }
 
-    /// True if the RX serial port (m_rx) is open.
-    bool rxConnected() const { return m_rx.isOpen(); }
+    /// Return the OS name of the given port (empty if closed or unset).
+    Q_INVOKABLE QString portName(int which) const {
+        return (which == 1) ? m_p1.portName() : m_p2.portName();
+    }
 
-    /// The OS port name bound to the TX side (empty if not connected).
-    Q_INVOKABLE QString txPortName() const { return m_tx.portName(); }
-
-    /// The OS port name bound to the RX side (empty if not connected).
-    QString rxPortName() const { return m_rx.portName(); }
-
-    /// The current UART baud of the TX side (valid when connected).
-    int txBaud() const { return m_tx.baudRate(); }
-
-    /// The current UART baud of the RX side (valid when connected).
-    int rxBaud() const { return m_rx.baudRate(); }
+    /// Return the current baud rate for the given port.
+    Q_INVOKABLE int baudRate(int which) const {
+        return (which == 1) ? m_p1.baudRate() : m_p2.baudRate();
+    }
 
 signals:
     // -----------------------
     // Property/Model change notifications (for QML bindings)
     // -----------------------
 
-    /// Emitted when the available port list changes after a refresh.
+    /// Emitted when the available port list changes after a refreshPorts() call.
     void portsChanged();
 
-    /// Emitted when the TX or RX baud value changes (typically after (dis)connect).
-    void txBaudChanged();
-    void rxBaudChanged();
+    /// Emitted whenever port 1 or 2 opens or closes.
+    void connectedChanged(int which, bool connected);
 
-    /// Emitted when the TX or RX connection open/closed state changes.
-    void txConnectedChanged();
-    void rxConnectedChanged();
+    /// Emitted when the baud rate of port 1 or 2 changes.
+    void baudChanged(int which);
 
-    /// Emitted when the TX or RX port name changes.
-    void txPortNameChanged();
-    void rxPortNameChanged();
+    /// Emitted when the port name of port 1 or 2 changes.
+    void portNameChanged(int which);
 
-    /// Emitted when the TX ot RX port does not connected to a radio modem
-    void butTxNotRadioModem();
-    void butRxNotRadioModem();
+    /// Emitted when the selected port is open but does not look like an RFD radio modem.
+    void butNotRadioModem(int which);
+
+    /// Emitted when m_rxFrom mapping (active RX port) changes.
+    void rxFromChanged();
+
+    /// Emitted when m_txTo mapping (active TX port) changes.
+    void txToChanged();
 
     // -----------------------
     // App-level signals
     // -----------------------
 
-    /**
-     * @brief errorMessage
-     * Human-readable error detail suitable for showing in the UI (e.g., toast/status bar).
-     */
+    /// Emitted when a full line of text has been received from the given port.
+    void textReceivedFrom(int which, const QString &line);
+
+    /// Emitted for user-visible error messages (shown in QML popup).
     void errorMessage(const QString &msg);
 
-    /**
-     * @brief rxTextRecieved
-     * Emitted whenever a complete line has been parsed from the RX port.
-     * NOTE: Spelling is kept as in your current code ("Recieved"). If you later rename
-     * to rxTextReceived, remember to also update QML handlers and moc-generated code.
-     */
-    void rxTextReceived(const QString &line);
-
-private slots:
-    /**
-     * @brief onRxReadyRead
-     * Slot connected to m_rx.readyRead(). Accumulates incoming bytes into m_rxbuffer,
-     * splits by '\n' boundaries, trims optional '\r', decodes as UTF-8 (fallback Latin1),
-     * and emits rxTextRecieved(line) for each complete line.
-     */
-    void onRxReadyRead();
-
-    /**
-     * @brief onTxErrorOccurred
-     * Slot connected to m_tx.errorOccurred(). Ignores NoError; otherwise emits errorMessage()
-     * with the driver’s error string to surface issues in the UI.
-     */
-    void onTxErrorOccurred(QSerialPort::SerialPortError error);
-
-    /**
-     * @brief onRxErrorOccurred
-     * Slot connected to m_rx.errorOccurred(). Ignores NoError; otherwise emits errorMessage()
-     * with the driver’s error string to surface issues in the UI.
-     */
-    void onRxErrorOccurred(QSerialPort::SerialPortError error);
-
 private:
-    /**
-     * @brief emitError
-     * Convenience helper to emit errorMessage(msg). Centralizes error surfacing so callers
-     * do not duplicate UI plumbing.
-     */
-    void emitError(const QString &msg);
+    /// Helper bundle to access port-specific members (port, RX buffer, connections) by index.
+    struct PortBundle {
+        QSerialPort& port;
+        QByteArray& rxBuf;
+        QMetaObject::Connection& readyConnect;
+        QMetaObject::Connection& errorConnect;
+    };
+
+    /// Non-const bundle selector for port 1 or 2.
+    PortBundle bundle(int which);
+
+    /// Const bundle selector for port 1 or 2 (wraps non-const version).
+    const PortBundle bundle(int which) const {
+        return const_cast<SerialBridge*>(this)->bundle(which);
+    }
+
+    /// Configure and open a QSerialPort with the given name/baud; returns true on success.
+    bool openPort(QSerialPort& port, const QString& name, int baud);
+
+    /// Convenience wrapper to emit an errorMessage().
+    void emitError(const QString& msg) { emit errorMessage(msg); }
+
+    /// Heuristic check whether a QSerialPortInfo looks like an RFD900x (VID/PID, etc.).
     static bool looksLikeRadio(const QSerialPortInfo &info);
+
+    /// Active probe using AT command to verify attached device is a radio modem.
     static bool probeRadio_AT(QSerialPort &port);
 
-    /**
-     * @brief openPort
-     * Internal helper to configure a QSerialPort with 8N1 / no flow control and open it
-     * for ReadWrite. If already open, closes first to reconfigure safely.
-     * @param port The QSerialPort instance to open (TX or RX).
-     * @param name OS port name.
-     * @param baud UART baud rate.
-     * @return true if open succeeded; false otherwise (also emits errorMessage()).
-     */
-    bool openPort(QSerialPort& port, const QString& name, int baud);
+    /// Connect readyRead/error handlers for the given port.
+    void attachRx(int which);
+
+    /// Disconnect readyRead/error handlers for the given port.
+    void detachRx(int which);
+
+    /// Slot-like handler for readyRead on a given port; buffers and parses lines.
+    void handleReadyRead(int which);
+
+    /// Slot-like handler for low-level serial errors on a given port.
+    void handleError(int which, QSerialPort::SerialPortError e);
+
+    /// Start a short RX pause window (used while transmitting on half-duplex links).
+    void beginRxPause(int ms);
+
+    /// Force end of RX pause and re-enable RX processing.
+    void endRxPause();
+
+    /// Return true if we are currently in an active RX pause window.
+    bool isRxPause() const {
+        if (!m_rxPaused) return false;
+        return m_rxPauseTimer.isValid() && (m_rxPauseTimer.elapsed() < m_rxPauseMs);
+    }
+
+    /// Split accumulated RX buffer into complete lines and emit textReceivedFrom().
+    void parseBufferedLines(int which);
 
     // -----------------------
     // Members
     // -----------------------
 
-    QSerialPort m_tx;       ///< The transmitter port (bytes are written here).
-    QSerialPort m_rx;       ///< The receiver port (bytes are read/parsed here).
+    QSerialPort m_p1, m_p2;          ///< Underlying serial ports for channel 1 and 2.
+    QByteArray m_rx1_buffer, m_rx2_buffer;  ///< Line-assembly buffers for each port.
 
-    QByteArray  m_rxbuffer; ///< Accumulates incoming bytes until newline(s) are found.
-    QStringList m_ports;    ///< Cached list of available ports for the UI.
+    int m_rxFrom = 1;                ///< Current port index used as RX source.
+    int m_txTo   = 2;                ///< Current port index used as TX destination.
+
+    bool m_rxPaused = false;         ///< Flag indicating RX is temporarily paused.
+    QElapsedTimer m_rxPauseTimer;    ///< Timer used to measure RX pause duration.
+    int m_rxPauseMs = 0;             ///< RX pause length in milliseconds.
+
+    QMetaObject::Connection m_readyConnect1, m_error1; ///< Connections for port 1 signals.
+    QMetaObject::Connection m_readyConnect2, m_error2; ///< Connections for port 2 signals.
+    QMetaObject::Connection m_activeReadyConnect;      ///< Currently active RX connection in single-RX mode.
+
+    QStringList m_ports;             ///< Cached list of discovered serial port names for UI.
 };
 
 #endif // SERIALBRIDGE_H
-

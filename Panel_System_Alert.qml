@@ -84,6 +84,7 @@ Rectangle {
             boundsBehavior: Flickable.StopAtBounds
 
             ScrollBar.vertical: Basic.ScrollBar {
+                id: control
                 policy: ScrollBar.AsNeeded
                 contentItem: Rectangle {
                     implicitWidth: 6
