@@ -39,18 +39,6 @@ bool SerialBridge::looksLikeRadio(const QSerialPortInfo& info) {
     return false;
 }
 
-bool SerialBridge::probeRadio_AT(QSerialPort& port) {
-    port.readAll();                 // Drop any stale bytes.
-    port.waitForReadyRead(50);
-    QThread::msleep(1000);          // Enforce SiK guard time (~1s silence) before "+++".
-
-    if (port.write("+++", 3) != 3)
-        return false;               // Can't even send the escape sequence.
-
-    port.write("ATO");              // Minimal data-mode exit; we don't parse the reply here.
-    return true;                    // For now, reaching this point is treated as “probe OK”.
-}
-
 void SerialBridge::refreshPorts() {
     QStringList list;
     for (const QSerialPortInfo& info : QSerialPortInfo::availablePorts()) {
@@ -112,10 +100,6 @@ bool SerialBridge::connectPort(int which, const QString& name, int baud) {
 
     // Attach RX handlers for this port (can listen on both ports).
     attachRx(which);
-
-    // Light sanity check that this behaves like a radio modem.
-    if (!probeRadio_AT(b.port))
-        emit butNotRadioModem(which);
 
     return true;
 }

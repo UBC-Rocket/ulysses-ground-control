@@ -80,9 +80,6 @@ signals:
     /// Emitted when the port name of port 1 or 2 changes.
     void portNameChanged(int which);
 
-    /// Emitted when the selected port is open but does not look like an RFD radio modem.
-    void butNotRadioModem(int which);
-
     /// Emitted when m_rxFrom mapping (active RX port) changes.
     void rxFromChanged();
 
@@ -155,8 +152,6 @@ private:
 
     /// Split accumulated RX buffer into complete lines and emit textReceivedFrom().
     void parseBufferedLines(int which);
-
-    void parseIncomingData(const QString& line);
 
     // -----------------------
     // Members

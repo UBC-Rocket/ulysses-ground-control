@@ -155,20 +155,30 @@ Rectangle {
                         }
 
                         Rectangle {
-                            radius: 9; height: 20; width: implicitWidth
+                            id: chip
+                            radius: 9
+                            height: 20
                             color: card.chipBg
                             border.width: 1
                             border.color: card.chipBg
-                            property string label: (level==="error")? "ERROR" : (level==="warning")? "WARN" : "OK"
+                            property string label: (level === "error")   ? "ERROR"
+                                                  : (level === "warning")? "WARN"
+                                                  : "OK"
+
                             Text {
+                                id: chipText
                                 anchors.centerIn: parent
                                 text: parent.label
                                 color: card.chipText
-                                font.pixelSize: 11; font.bold: true
+                                font.pixelSize: 11
+                                font.bold: true
                                 padding: 9
                             }
-                            implicitWidth: Math.max(54, childrenRect.width + 10)
+
+                            width: Math.max(54, chipText.implicitWidth + 2 * chipText.padding)
+                            // no implicitWidth binding here
                         }
+
                     }
 
                     // message body

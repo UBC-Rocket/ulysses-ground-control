@@ -118,7 +118,7 @@ ApplicationWindow {
                 if (rxWhich === 2)
                     singleConnected = connected
             }
-        }
+        }       
 
         // Keep title in sync with backend TX/RX mapping
         function onTxToChanged() { radioWin.title = radioWin.titleText() }
@@ -321,7 +321,7 @@ ApplicationWindow {
                                     id: singleInput
                                     placeholderText: "Type text and press Enter…"
                                     Layout.fillWidth: true
-                                    enabled: bridge.isConnected(rxWhich)
+                                    enabled: singleConnected
                                     focus: true
                                     onAccepted: {
                                         if (text.length && bridge.isConnected(rxWhich)) {

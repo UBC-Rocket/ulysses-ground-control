@@ -62,4 +62,3 @@ void AlarmReceiver::classifyAndEmit(const QString& line)
     }
     // No match → silent ignore.
 }
-
