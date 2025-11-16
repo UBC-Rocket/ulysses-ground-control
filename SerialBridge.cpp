@@ -4,6 +4,11 @@
 #include <QSerialPortInfo>
 #include <QElapsedTimer>
 #include <QThread>
+#include <QDebug>
+
+namespace {
+enum { kSerialDebug = 0 }; // flip to 1 to re-enable verbose IMU logging
+}
 
 SerialBridge::SerialBridge(QObject* parent) : QObject(parent) {
     refreshPorts(); // Build the initial COM list so the UI has something to show.

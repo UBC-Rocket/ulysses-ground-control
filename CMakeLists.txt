@@ -41,6 +41,8 @@ qt_add_qml_module(appulysses_ground_control
         SOURCES
                 SerialBridge.h
                 SerialBridge.cpp
+                SensorDataModel.h
+                SensorDataModel.cpp
                 CommandSender.h
                 CommandSender.cpp
                 AlarmReceiver.h

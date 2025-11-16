@@ -4,6 +4,7 @@
 #include <QCommandLineParser>
 #include <QTimer>
 #include "SerialBridge.h"
+#include "SensorDataModel.h"
 #include "CommandSender.h"
 #include "AlarmReceiver.h"
 
@@ -12,16 +13,23 @@ int main(int argc, char *argv[])
     // Qt GUI application (event loop owner)
     QGuiApplication app(argc, argv);
 
-    // Backend objects live for the duration of main()
-    SerialBridge   bridge;                   // serial I/O backend
-    CommandSender  commandsender(&bridge);   // sends commands via bridge
-    AlarmReceiver  alarmreceiver(&bridge);   // receives/decodes alarms via bridge
+    SerialBridge bridge;
+    SensorDataModel sensorData;
+
+    // Connect serial bridge to sensor data
+    QObject::connect(&bridge, &SerialBridge::imuDataReceived,
+                                &sensorData, &SensorDataModel::updateIMU);
+    QObject::connect(&bridge, &SerialBridge::kalmanDataReceived,
+                                &sensorData, &SensorDataModel::updateKalman);
+    QObject::connect(&bridge, &SerialBridge::baroDataReceived,
+                                &sensorData, &SensorDataModel::updateBaro);
+    QObject::connect(&bridge, &SerialBridge::telemetryDataReceived,
+                                &sensorData, &SensorDataModel::updateTelemetry);
 
     // QML engine + expose C++ backends to QML by name
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("bridge", &bridge);
-    engine.rootContext()->setContextProperty("commandsender", &commandsender);
-    engine.rootContext()->setContextProperty("alarmreceiver", &alarmreceiver);
+    engine.rootContext()->setContextProperty("sensorData", &sensorData);
 
     // If QML fails to load, quit with error code
     QObject::connect(

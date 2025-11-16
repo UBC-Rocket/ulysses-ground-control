@@ -87,6 +87,7 @@ signals:
     /// Emitted when m_txTo mapping (active TX port) changes.
     void txToChanged();
 
+
     // -----------------------
     // App-level signals
     // -----------------------
@@ -152,6 +153,8 @@ private:
 
     /// Split accumulated RX buffer into complete lines and emit textReceivedFrom().
     void parseBufferedLines(int which);
+
+    void parseIncomingData(const QString& line);
 
     // -----------------------
     // Members
