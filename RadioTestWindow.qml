@@ -83,7 +83,7 @@ ApplicationWindow {
 
         // Refresh combo models and window title when port list changes
         function onPortsChanged() {
-            singlePortSel.model = bridge.ports()
+            singlePortSel.model = bridge.ports
             radioWin.title = radioWin.titleText()
         }
 
@@ -244,7 +244,7 @@ ApplicationWindow {
                             // OS serial port selection
                             ComboBox {
                                 id: singlePortSel
-                                model: bridge.ports()
+                                model: bridge.ports
                                 Layout.preferredWidth: 220
                                 Component.onCompleted: {
                                     const name = bridge.portName(rxWhich)
@@ -427,7 +427,7 @@ ApplicationWindow {
                             // OS port selection for P1
                             ComboBox {
                                 id: portSel1
-                                model: bridge.ports()
+                                model: bridge.ports
                                 Layout.preferredWidth: 160
                                 Component.onCompleted: {
                                     const name = bridge.portName(1)
@@ -631,7 +631,7 @@ ApplicationWindow {
                             // OS port selection for P2
                             ComboBox {
                                 id: portSel2
-                                model: bridge.ports()
+                                model: bridge.ports
                                 Layout.preferredWidth: 160
                                 Component.onCompleted: {
                                     const name = bridge.portName(2)

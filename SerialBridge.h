@@ -17,6 +17,8 @@ public:
      */
     explicit SerialBridge(QObject* parent = nullptr);
 
+    Q_PROPERTY(QStringList ports READ ports NOTIFY portsChanged)
+
     // -----------------------
     // QML-callable API
     // -----------------------
