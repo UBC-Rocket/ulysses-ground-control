@@ -144,6 +144,7 @@ signals:
     void butTxNotRadioModem();
     void butRxNotRadioModem();
 
+
     // -----------------------
     // App-level signals
     // -----------------------
@@ -161,6 +162,14 @@ signals:
      * to rxTextReceived, remember to also update QML handlers and moc-generated code.
      */
     void rxTextReceived(const QString &line);
+
+    /**
+     * Reading raw String into correspoding sensor data
+     */
+    void imuDataReceived(double x, double y, double z, double roll, double pitch, double yaw);
+    void kalmanDataReceived(double rawAngle, double filteredAngle);
+    void baroDataReceived(double pressure, double altitude);
+    void telemetryDataReceived(double velocity, double temperature, double signal, double battery);
 
 private slots:
     /**
@@ -205,6 +214,8 @@ private:
      * @return true if open succeeded; false otherwise (also emits errorMessage()).
      */
     bool openPort(QSerialPort& port, const QString& name, int baud);
+
+    void parseIncomingData(const QString& line);
 
     // -----------------------
     // Members
