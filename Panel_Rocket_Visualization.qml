@@ -29,7 +29,7 @@ BasePanel {
 
 
 
-        //Variables & Constants declared
+        //Variables & Constants received from sensorData
            property real x_kal: sensorData.imuX
            property real y_kal: sensorData.imuY
            property real z_roll: sensorData.imuZ

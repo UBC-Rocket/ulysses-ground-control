@@ -16,14 +16,14 @@ int main(int argc, char *argv[])
     SerialBridge bridge;
     SensorDataModel sensorData;
 
-    // Connect and VERIFY
-    bool ok1 = QObject::connect(&bridge, &SerialBridge::imuDataReceived,
+    // Connect serial bridge to sensor data
+    QObject::connect(&bridge, &SerialBridge::imuDataReceived,
                                 &sensorData, &SensorDataModel::updateIMU);
-    bool ok2 = QObject::connect(&bridge, &SerialBridge::kalmanDataReceived,
+    QObject::connect(&bridge, &SerialBridge::kalmanDataReceived,
                                 &sensorData, &SensorDataModel::updateKalman);
-    bool ok3 = QObject::connect(&bridge, &SerialBridge::baroDataReceived,
+    QObject::connect(&bridge, &SerialBridge::baroDataReceived,
                                 &sensorData, &SensorDataModel::updateBaro);
-    bool ok4 = QObject::connect(&bridge, &SerialBridge::telemetryDataReceived,
+    QObject::connect(&bridge, &SerialBridge::telemetryDataReceived,
                                 &sensorData, &SensorDataModel::updateTelemetry);
 
     // QML engine + expose C++ backends to QML by name
