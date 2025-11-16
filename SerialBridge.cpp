@@ -6,6 +6,10 @@
 #include <QThread>
 #include <QDebug>
 
+namespace {
+enum { kSerialDebug = 0 }; // flip to 1 to re-enable verbose IMU logging
+}
+
 SerialBridge::SerialBridge(QObject* parent) : QObject(parent) {
     refreshPorts(); // Build the initial COM list so the UI has a correct starting point.
     connect(&m_rx, &QSerialPort::readyRead, this, &SerialBridge::onRxReadyRead); // Handle incoming bytes as soon as the OS signals data is ready.
@@ -215,8 +219,13 @@ void SerialBridge::parseIncomingData(const QString& line) {
     double signal      = parts[12].toDouble();  // Signal strength
     double battery     = parts[13].toDouble();  // Battery level
 
-    // Logging
-    qDebug() << "Emitting signals - IMU X:" << x;
+    if (kSerialDebug) {
+        qDebug() << "IMU:" << x << y << z
+                 << "| Gyro:" << roll << pitch << yaw
+                 << "| Baro:" << pressure << altitude
+                 << "| Kalman:" << rawAngle << filteredAngle
+                 << "| Telemetry:" << velocity << temperature << signal << battery;
+    }
     
     // Emit signals to notify the data model
     emit imuDataReceived(x, y, z, roll, pitch, yaw);
@@ -242,4 +251,3 @@ void SerialBridge::onRxErrorOccurred(QSerialPort::SerialPortError e) {
 void SerialBridge::emitError(const QString& msg) {
     emit errorMessage(msg); // Centralized error reporting; QML listens to this single signal.
 }
-
