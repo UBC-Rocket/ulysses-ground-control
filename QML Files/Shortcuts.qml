@@ -3,7 +3,6 @@ import QtQuick.Controls
 import QtQuick.Window
 
 Item {
-
     property Window targetWindow
 
     Shortcut {
