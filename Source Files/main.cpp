@@ -3,6 +3,7 @@
 #include <QQmlContext>
 #include <QCommandLineParser>
 #include <QTimer>
+
 #include "SerialBridge.h"
 #include "SensorDataModel.h"
 #include "CommandSender.h"
@@ -35,7 +36,8 @@ int main(int argc, char *argv[])
         Qt::QueuedConnection);
 
     // Load the QML entry point from the compiled QML module
-    engine.loadFromModule("ulysses_ground_control", "Main");
+    const QUrl url(u"qrc:/ulysses_ground_control/QML Files/Main.qml"_qs);
+    engine.load(url);
 
     // Safety check: no root objects means load failed
     if (engine.rootObjects().isEmpty())
