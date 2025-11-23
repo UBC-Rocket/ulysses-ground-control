@@ -13,11 +13,11 @@ GridLayout {
 
     // ───── Row 0 ──────────────────────────────────────────────────────────
 
-    // Panel_IMU_And_Kalman_Data
+    // Panel_Kalma_and_Engine
     Item {
         Layout.row: 0; Layout.column: 0
         Layout.fillWidth: true; Layout.fillHeight: true
-        Panel_IMU_And_Kalman_Data {
+        Panel_Kalman_and_Engine {
             anchors.fill: parent
         }
     }
@@ -38,12 +38,6 @@ GridLayout {
 
     // ───── Row 1 ──────────────────────────────────────────────────────────
 
-    // Panel_Engine_Control
-    Item {
-        Layout.row: 1; Layout.column: 0
-        Layout.fillWidth: true; Layout.fillHeight: true
-        Panel_Engine_Control { anchors.fill: parent }
-    }
 
     // Panel_Control
     Item {

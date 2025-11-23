@@ -155,8 +155,6 @@ private:
     /// Split accumulated RX buffer into complete lines and emit textReceivedFrom().
     void parseBufferedLines(int which);
 
-    void parseIncomingData(const QString& line);
-
     // -----------------------
     // Members
     // -----------------------
