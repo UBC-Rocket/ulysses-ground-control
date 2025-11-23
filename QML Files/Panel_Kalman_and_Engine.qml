@@ -42,7 +42,7 @@ BasePanel {
 
         DataBoxList {
             anchors.top: subheader_angles.bottom
-            width: panel_Kalma_and_Engine.width;
+            width: panel_Kalman_and_Engine.width;
 
             size: 2
             dataNames: ["RAW ANGLE X", "FILTERED ANGLE X"]

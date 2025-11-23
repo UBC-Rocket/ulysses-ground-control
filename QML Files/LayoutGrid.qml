@@ -17,7 +17,7 @@ GridLayout {
     Item {
         Layout.row: 0; Layout.column: 0
         Layout.fillWidth: true; Layout.fillHeight: true
-        Panel_Kalma_and_Engine {
+        Panel_Kalman_and_Engine {
             anchors.fill: parent
         }
     }
