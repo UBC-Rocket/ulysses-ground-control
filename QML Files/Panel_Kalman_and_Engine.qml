@@ -2,7 +2,7 @@ import QtQuick
 import "Items"
 
 BasePanel {
-    id: panel_Kalma_and_Engine
+    id: panel_Kalman_and_Engine
 
     // Kalman Filter
     property double raw_angle_x: sensorData.rawAngleX
@@ -17,7 +17,7 @@ BasePanel {
 
     BaseHeader {
         id:header
-        headerText: "Kalma Angles and Engine"
+        headerText: "Kalman Angles and Engine"
     }
 
     Rectangle {
@@ -61,7 +61,7 @@ BasePanel {
         }
 
         DataBoxList {
-            width: panel_Kalma_and_Engine.width;
+            width: panel_Kalman_and_Engine.width;
 
             size: 2
             dataNames: ["RAW ANGLE Y", "FILTERED ANGLE Y"]
@@ -90,7 +90,7 @@ BasePanel {
 
         DataBoxList {
             anchors.top: subheader_engine.bottom
-            width: panel_Kalma_and_Engine.width;
+            width: panel_Kalman_and_Engine.width;
 
             size: 2
             boxHeight: 70
