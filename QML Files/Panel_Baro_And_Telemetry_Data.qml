@@ -82,5 +82,4 @@ BasePanel {
             dataValues: [signals, battery]
         }
     }
-
 }

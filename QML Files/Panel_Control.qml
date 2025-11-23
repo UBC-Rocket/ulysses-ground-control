@@ -4,7 +4,8 @@ import QtQuick.Layouts
 
 Rectangle {
     id: control_panel
-    signal commandTriggered(string code) // Public signal: emitted when a command card is clicked; parent can handle it.
+    property int txWhich: 1
+    signal commandTriggered(int which, string code) // Public signal: emitted when a command card is clicked; parent can handle it.
 
     color: "#1F2937"
     border.color: "#2d3748"
@@ -104,7 +105,7 @@ Rectangle {
                     hoverEnabled: true
                     onPressed: parent.scale = 0.985 // Tactile press effect (shrinks slightly).
                     onReleased: parent.scale = 1.0  // Reset scale on release.
-                    onClicked: control_panel.commandTriggered(cmd) // Raise event upward with payload.
+                    onClicked: control_panel.commandTriggered(txWhich, cmd) // Raise event upward with payload.
                 }
             }
         }
@@ -159,15 +160,8 @@ Rectangle {
     // --- Signal wiring: when a card is clicked, forward the code to the C++ CommandSender object ---
     Connections {
         target: control_panel
-        function onCommandTriggered(code) {
-            commandsender.sendCode(code) // Delegate to Q_INVOKABLE; panel stays transport-agnostic.
+        function onCommandTriggered(txWhich, code) {
+            commandsender.sendCode(txWhich, code) // Delegate to Q_INVOKABLE; panel stays transport-agnostic.
         }
     }
-
 }
-
-
-
-
-
-

@@ -3,6 +3,7 @@
 #include <QQmlContext>
 #include <QCommandLineParser>
 #include <QTimer>
+
 #include "SerialBridge.h"
 #include "SensorDataModel.h"
 #include "CommandSender.h"
@@ -13,22 +14,17 @@ int main(int argc, char *argv[])
     // Qt GUI application (event loop owner)
     QGuiApplication app(argc, argv);
 
+    // Backend objects live for the duration of main
     SerialBridge bridge;
-    SensorDataModel sensorData;
-
-    // Connect serial bridge to sensor data
-    QObject::connect(&bridge, &SerialBridge::imuDataReceived,
-                                &sensorData, &SensorDataModel::updateIMU);
-    QObject::connect(&bridge, &SerialBridge::kalmanDataReceived,
-                                &sensorData, &SensorDataModel::updateKalman);
-    QObject::connect(&bridge, &SerialBridge::baroDataReceived,
-                                &sensorData, &SensorDataModel::updateBaro);
-    QObject::connect(&bridge, &SerialBridge::telemetryDataReceived,
-                                &sensorData, &SensorDataModel::updateTelemetry);
+    CommandSender  commandsender(&bridge);   // sends commands via bridge
+    AlarmReceiver  alarmreceiver(&bridge);   // receives/decodes alarms via bridge
+    SensorDataModel sensorData(&bridge);
 
     // QML engine + expose C++ backends to QML by name
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("bridge", &bridge);
+    engine.rootContext()->setContextProperty("commandsender", &commandsender);
+    engine.rootContext()->setContextProperty("alarmreceiver", &alarmreceiver);
     engine.rootContext()->setContextProperty("sensorData", &sensorData);
 
     // If QML fails to load, quit with error code
@@ -40,7 +36,8 @@ int main(int argc, char *argv[])
         Qt::QueuedConnection);
 
     // Load the QML entry point from the compiled QML module
-    engine.loadFromModule("ulysses_ground_control", "Main");
+    const QUrl url(u"qrc:/ulysses_ground_control/QML Files/Main.qml"_qs);
+    engine.load(url);
 
     // Safety check: no root objects means load failed
     if (engine.rootObjects().isEmpty())
@@ -49,4 +46,3 @@ int main(int argc, char *argv[])
     // Start the event loop
     return app.exec();
 }
-
