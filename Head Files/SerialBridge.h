@@ -6,6 +6,7 @@
 #include <QSerialPort>
 #include <QSerialPortInfo>
 #include <QTimer>
+#include <QElapsedTimer>
 
 class SerialBridge : public QObject {
     Q_OBJECT
