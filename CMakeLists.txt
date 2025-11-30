@@ -56,6 +56,7 @@ set(HDR_FILES
 # Executable target
 # ----------------------------------------------------------------------
 qt_add_executable(ulysses_ground_control
+    MACOSX_BUNDLE
     MANUAL_FINALIZATION
     ${SRC_FILES}
     ${HDR_FILES}       # just so Qt Creator shows a Header Files group
