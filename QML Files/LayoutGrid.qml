@@ -38,6 +38,12 @@ GridLayout {
 
     // ───── Row 1 ──────────────────────────────────────────────────────────
 
+    // Panel_PID_Slider
+    Item {
+        Layout.row: 1; Layout.column: 0
+        Layout.fillWidth: true; Layout.fillHeight: true
+        Panel_PID_Slider { anchors.fill: parent }
+    }
 
     // Panel_Control
     Item {
@@ -53,6 +59,5 @@ GridLayout {
         Panel_System_Alert { anchors.fill: parent }
     }
 }
-
 
 
