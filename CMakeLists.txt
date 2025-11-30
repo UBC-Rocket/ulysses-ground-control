@@ -56,6 +56,7 @@ set(HDR_FILES
 # Executable target
 # ----------------------------------------------------------------------
 qt_add_executable(ulysses_ground_control
+    MACOSX_BUNDLE
     MANUAL_FINALIZATION
     ${SRC_FILES}
     ${HDR_FILES}       # just so Qt Creator shows a Header Files group
@@ -73,6 +74,7 @@ qt_add_qml_module(ulysses_ground_control
         "${QML_DIR}/LayoutGrid.qml"
         "${QML_DIR}/Panel_Baro_And_Telemetry_Data.qml"
         "${QML_DIR}/Panel_Control.qml"
+        "${QML_DIR}/Panel_PID_Slider.qml"
         "${QML_DIR}/Panel_Kalman_and_Engine.qml"
         "${QML_DIR}/Panel_Rocket_Visualization.qml"
         "${QML_DIR}/Panel_System_Alert.qml"
