@@ -32,6 +32,7 @@ BasePanel {
         //Variables & Constants received from sensorData
            property real angle_x: sensorData.filteredAngleX
            property real angle_y: sensorData.filteredAngleY
+           property real angle_z: sensorData.filteredAngleZ
            property real length: 200        // shaft length
            property real thickness: 0.4       // shaft thickness
 
@@ -76,12 +77,17 @@ BasePanel {
                    id: rocket_frame
 
                    //Qt has y-axis pointing up by default. So the y-axis rotation is actually the "z-axis"
-                   eulerRotation: Qt.vector3d(visualization.angle_x, 0, visualization.angle_y)
+                   eulerRotation: Qt.vector3d(visualization.angle_x, visualization.angle_z, visualization.angle_y)
                    pivot: Qt.vector3d(0,0,0)
 
                    property real d: 10          // diameter
                    property real h_body: 30    // cylinder height
                    property real h_nose: h_body/3 //nose height
+
+                   // Fin dimensions: offset, length, thickness
+                   property real finLength: d * 1.7
+                   property real finThickness: d * 0.05
+                   property real finOffsetY: -h_body * 24
 
 
                    //body
@@ -125,6 +131,34 @@ BasePanel {
                        materials: DefaultMaterial{
                            diffuseColor: "blue"
                        }
+                   }
+
+                   // Simple thin fins using only offset, length, and thickness
+                   Model{
+                       source: "#Cube"
+                       position: Qt.vector3d(rocket_frame.d / 2 + rocket_frame.finThickness/2, rocket_frame.finOffsetY, 0)
+                       scale: Qt.vector3d(rocket_frame.finThickness, rocket_frame.h_body * 0.6, rocket_frame.finLength)
+                       materials: DefaultMaterial { diffuseColor: "#c0c7cf" }
+                   }
+                   Model{
+                       source: "#Cube"
+                       position: Qt.vector3d(-(rocket_frame.d / 2 + rocket_frame.finThickness/2), rocket_frame.finOffsetY, 0)
+                       scale: Qt.vector3d(rocket_frame.finThickness, rocket_frame.h_body * 0.6, rocket_frame.finLength)
+                       materials: DefaultMaterial { diffuseColor: "#c0c7cf" }
+                   }
+                   Model{
+                       source: "#Cube"
+                       position: Qt.vector3d(0, rocket_frame.finOffsetY, rocket_frame.d / 2 + rocket_frame.finThickness/2)
+                       eulerRotation: Qt.vector3d(0,90,0)
+                       scale: Qt.vector3d(rocket_frame.finThickness, rocket_frame.h_body * 0.6, rocket_frame.finLength)
+                       materials: DefaultMaterial { diffuseColor: "#c0c7cf" }
+                   }
+                   Model{
+                       source: "#Cube"
+                       position: Qt.vector3d(0, rocket_frame.finOffsetY, -(rocket_frame.d / 2 + rocket_frame.finThickness/2))
+                       eulerRotation: Qt.vector3d(0,90,0)
+                       scale: Qt.vector3d(rocket_frame.finThickness, rocket_frame.h_body * 0.6, rocket_frame.finLength)
+                       materials: DefaultMaterial { diffuseColor: "#c0c7cf" }
                    }
 
                }

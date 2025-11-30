@@ -56,13 +56,13 @@ void SensorDataModel::parseIncomingData(const QString& line)
     // Incoming CSV, comma-separated values.
     QStringList parts = line.split(',', Qt::SkipEmptyParts);
 
-    // Expected format (10 fields):
-    // pressure,altitude,raw_angle_x,filtered_angle_x,raw_angle_y,filtered_angle_y,velocity,temperature,signal,battery
-    if (parts.size() != 10) {
+    // Expected format (12 fields):
+    // pressure,altitude,raw_angle_x,filtered_angle_x,raw_angle_y,filtered_angle_y,raw_angle_z,filtered_angle_z,velocity,temperature,signal,battery
+    if (parts.size() != 12) {
         // Throttle warnings so high-rate streams don’t flood the log.
         static int errorCount = 0;
         if (++errorCount % 50 == 0) {
-            qWarning() << "Expected 10 CSV fields, got"
+            qWarning() << "Expected 12 CSV fields, got"
                        << parts.size() << "in line:" << line;
         }
         return;
@@ -74,31 +74,36 @@ void SensorDataModel::parseIncomingData(const QString& line)
     double filteredAngleX  = parts[3].toDouble();
     double rawAngleY       = parts[4].toDouble();
     double filteredAngleY  = parts[5].toDouble();
-    double velocity        = parts[6].toDouble();
-    double temperature     = parts[7].toDouble();
-    double signal          = parts[8].toDouble();
-    double battery         = parts[9].toDouble();
+    double rawAngleZ       = parts[6].toDouble();
+    double filteredAngleZ  = parts[7].toDouble();
+    double velocity        = parts[8].toDouble();
+    double temperature     = parts[9].toDouble();
+    double signal          = parts[10].toDouble();
+    double battery         = parts[11].toDouble();
 
     if (kSerialDebug) {
         qDebug() << "| Baro:" << pressure << altitude
-                 << "| Kalman:" << rawAngleX << filteredAngleX << rawAngleY << filteredAngleY
+                 << "| Kalman:" << rawAngleX << filteredAngleX << rawAngleY << filteredAngleY << rawAngleZ << filteredAngleZ
                  << "| Telemetry:" << velocity << temperature << signal << battery;
     }
 
     // Update grouped values and notify QML bindings.
-    updateKalman(rawAngleX, filteredAngleX, rawAngleY, filteredAngleY);
+    updateKalman(rawAngleX, filteredAngleX, rawAngleY, filteredAngleY, rawAngleZ, filteredAngleZ);
     updateBaro(pressure, altitude);
     updateTelemetry(velocity, temperature, signal, battery);
 }
 
 void SensorDataModel::updateKalman(double rawAngleX, double filteredAngleX,
-                                   double rawAngleY, double filteredAngleY)
+                                   double rawAngleY, double filteredAngleY,
+                                   double rawAngleZ, double filteredAngleZ)
 {
     // Cache latest angles and notify QML bindings.
     m_rawAngleX = rawAngleX;
     m_filteredAngleX = filteredAngleX;
     m_rawAngleY = rawAngleY;
     m_filteredAngleY = filteredAngleY;
+    m_rawAngleZ = rawAngleZ;
+    m_filteredAngleZ = filteredAngleZ;
 
     emit kalmanDataChanged();
 }
