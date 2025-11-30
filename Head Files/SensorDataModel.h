@@ -26,6 +26,8 @@ public:
     Q_PROPERTY(double filteredAngleX READ filteredAngleX NOTIFY kalmanDataChanged)
     Q_PROPERTY(double rawAngleY READ rawAngleY NOTIFY kalmanDataChanged)
     Q_PROPERTY(double filteredAngleY READ filteredAngleY NOTIFY kalmanDataChanged)
+    Q_PROPERTY(double rawAngleZ READ rawAngleZ NOTIFY kalmanDataChanged)
+    Q_PROPERTY(double filteredAngleZ READ filteredAngleZ NOTIFY kalmanDataChanged)
 
     // Telemetry
     Q_PROPERTY(double velocity READ velocity NOTIFY telemetryDataChanged)
@@ -41,6 +43,8 @@ public:
     double filteredAngleX() const { return m_filteredAngleX; }
     double rawAngleY() const { return m_rawAngleY; }
     double filteredAngleY() const { return m_filteredAngleY; }
+    double rawAngleZ() const { return m_rawAngleZ; }
+    double filteredAngleZ() const { return m_filteredAngleZ; }
 
     double velocity() const { return m_velocity; }
     double temperature() const { return m_temperature; }
@@ -53,7 +57,8 @@ public slots:
 
     /// Store Kalman filter angles and notify QML.
     void updateKalman(double rawAngleX, double filteredAngleX,
-                      double rawAngleY, double filteredAngleY);
+                      double rawAngleY, double filteredAngleY,
+                      double rawAngleZ, double filteredAngleZ);
 
     /// Store barometric values and notify QML.
     void updateBaro(double pressure, double altitude);
@@ -77,6 +82,8 @@ private:
     double m_filteredAngleX = 0.0;
     double m_rawAngleY = 0.0;
     double m_filteredAngleY = 0.0;
+    double m_rawAngleZ = 0.0;
+    double m_filteredAngleZ = 0.0;
 
     double m_velocity = 0.0;
     double m_temperature = 0.0;

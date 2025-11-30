@@ -2,6 +2,9 @@ import QtQuick
 
 Rectangle {
     anchors.left: parent.left
+    color: "transparent"
+    implicitHeight: boxHeight
+    height: implicitHeight
 
     property int size
     property int boxHeight: 50
