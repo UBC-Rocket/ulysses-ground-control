@@ -89,8 +89,8 @@ Rectangle {
                 contentItem: Rectangle {
                     implicitWidth: 6
                     radius: width/2
-                    color: control.pressed ? "#536173"
-                         : control.hovered ? "#455264"
+                    color: parent.pressed ? "#536173"
+                         : parent.hovered ? "#455264"
                          :                    "#394454"
                 }
                 background: Rectangle { color: "transparent" }
