@@ -3,8 +3,12 @@ import "Items"
 
 BasePanel {
     id: panel_Kalman_and_Engine
-    property real sectionSpacing: 6
-    property real rowPadding: 4
+
+    // ===== Spacing controls =====
+    property real sectionSpacing: 6                      // spacing between sections (X->Y->Z->Engine)
+    property real headerToFirstSectionSpacing: 2         // main title -> "Kalman Angles (deg)" section
+    property real subheaderToDataSpacing: 12             // "Kalman Angles (deg)" -> X boxes, "Engine Control" -> boxes
+    property real rowPadding: 4                          // extra padding you were using for implicitHeight (kept)
 
     // Kalman Filter
     property double raw_angle_x: sensorData.rawAngleX
@@ -18,22 +22,29 @@ BasePanel {
     property double throttle: 0
     property double fuel: 0
 
-
     BaseHeader {
-        id:header
+        id: header
         headerText: "Kalman Angles and Engine"
     }
 
     Rectangle {
         id: kalman_angles_x
         color: "transparent"
-        implicitHeight: subheader_angles.implicitHeight + panel_Kalman_and_Engine.rowPadding + dataBoxListX.height
+
+        // include spacing between subheader and dataBoxListX
+        implicitHeight: subheader_angles.implicitHeight
+                        + panel_Kalman_and_Engine.subheaderToDataSpacing
+                        + dataBoxListX.height
         height: implicitHeight
+
         anchors {
             top: header.bottom
             left: parent.left
             right: parent.right
-            topMargin: panel_Kalman_and_Engine.sectionSpacing
+
+            // decrease spacing between main title and this section
+            topMargin: panel_Kalman_and_Engine.headerToFirstSectionSpacing
+
             leftMargin: header.anchors.leftMargin
             rightMargin: header.anchors.leftMargin
         }
@@ -49,10 +60,14 @@ BasePanel {
         DataBoxList {
             id: dataBoxListX
             anchors.top: subheader_angles.bottom
-            width: parent.width;
+
+            // increase spacing between "Kalman Angles (deg)" and X angle boxes
+            anchors.topMargin: panel_Kalman_and_Engine.subheaderToDataSpacing
+
+            width: parent.width
 
             size: 2
-            dataNames: ["RAW ANGLE X", "FILTERED ANGLE X"]
+            dataNames: ["RAW X", "FILTERED X"]
             dataValues: [raw_angle_x, filtered_angle_x]
         }
     }
@@ -62,6 +77,7 @@ BasePanel {
         color: "transparent"
         implicitHeight: dataBoxListY.height + panel_Kalman_and_Engine.rowPadding
         height: implicitHeight
+
         anchors {
             top: kalman_angles_x.bottom
             left: parent.left
@@ -73,10 +89,10 @@ BasePanel {
 
         DataBoxList {
             id: dataBoxListY
-            width: parent.width;
+            width: parent.width
 
             size: 2
-            dataNames: ["RAW ANGLE Y", "FILTERED ANGLE Y"]
+            dataNames: ["RAW Y", "FILTERED Y"]
             dataValues: [raw_angle_y, filtered_angle_y]
         }
     }
@@ -86,6 +102,7 @@ BasePanel {
         color: "transparent"
         implicitHeight: dataBoxListZ.height + panel_Kalman_and_Engine.rowPadding
         height: implicitHeight
+
         anchors {
             top: kalman_angles_y.bottom
             left: parent.left
@@ -97,10 +114,10 @@ BasePanel {
 
         DataBoxList {
             id: dataBoxListZ
-            width: parent.width;
+            width: parent.width
 
             size: 2
-            dataNames: ["RAW ANGLE Z", "FILTERED ANGLE Z"]
+            dataNames: ["RAW Z", "FILTERED Z"]
             dataValues: [raw_angle_z, filtered_angle_z]
         }
     }
@@ -109,8 +126,12 @@ BasePanel {
         id: engine
         color: "transparent"
 
-        implicitHeight: subheader_engine.implicitHeight + panel_Kalman_and_Engine.rowPadding + dataBoxListEngine.height
+        // include spacing between subheader and engine databoxes
+        implicitHeight: subheader_engine.implicitHeight
+                        + panel_Kalman_and_Engine.subheaderToDataSpacing
+                        + dataBoxListEngine.height
         height: implicitHeight
+
         anchors {
             top: kalman_angles_z.bottom
             left: parent.left
@@ -131,7 +152,11 @@ BasePanel {
         DataBoxList {
             id: dataBoxListEngine
             anchors.top: subheader_engine.bottom
-            width: parent.width;
+
+            // increase spacing between "Engine Control" and its data boxes
+            anchors.topMargin: panel_Kalman_and_Engine.subheaderToDataSpacing
+
+            width: parent.width
 
             size: 2
             boxHeight: 50
