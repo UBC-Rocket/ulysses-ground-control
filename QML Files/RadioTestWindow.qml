@@ -118,7 +118,7 @@ ApplicationWindow {
                 if (rxWhich === 2)
                     singleConnected = connected
             }
-        }       
+        }
 
         // Keep title in sync with backend TX/RX mapping
         function onTxToChanged() { radioWin.title = radioWin.titleText() }

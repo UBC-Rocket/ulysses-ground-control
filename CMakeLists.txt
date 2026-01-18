@@ -81,6 +81,7 @@ qt_add_qml_module(ulysses_ground_control
         "${QML_DIR}/Panel_Test.qml"
         "${QML_DIR}/RadioTestWindow.qml"
         "${QML_DIR}/Shortcuts.qml"
+        "${QML_DIR}/SettingsPage.qml"
         "${QML_DIR}/Items/BaseHeader.qml"
         "${QML_DIR}/Items/BasePanel.qml"
         "${QML_DIR}/Items/Data.qml"
