@@ -3,6 +3,7 @@
 #include <QQmlContext>
 #include <QCommandLineParser>
 #include <QTimer>
+#include <QQuickStyle>
 
 #include "SerialBridge.h"
 #include "SensorDataModel.h"
@@ -13,6 +14,8 @@ int main(int argc, char *argv[])
 {
     // Qt GUI application (event loop owner)
     QGuiApplication app(argc, argv);
+
+    QQuickStyle::setStyle("Fusion");
 
     // Backend objects live for the duration of main
     SerialBridge bridge;

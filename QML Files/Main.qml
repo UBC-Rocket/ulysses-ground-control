@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
+import QtQuick.Controls.Basic as Basic
 
 ApplicationWindow {
     //Initializing the Window
@@ -36,37 +37,54 @@ ApplicationWindow {
 
         // Initialize the layout
         LayoutGrid {
+
         }
     }
 
-    property var radioConsole: null
+    property var settingsPage: null
 
     Component {
-        id: radioConsoleComponent
-        RadioTestWindow { }
+        id: settingsPageComponent
+        SettingsPage { }
     }
 
-    function openRadioConsole() {
-        if (!radioConsole) {
-            radioConsole = radioConsoleComponent.createObject(window, {
+    function openSettingsPage() {
+        if (!settingsPage) {
+            settingsPage = settingsPageComponent.createObject(window, {
                 x: window.x + 60,
                 y: window.y + 60
             })
         }
-        radioConsole.show()
-        radioConsole.raise()
-        radioConsole.requestActivate()
+        settingsPage.show()
+        settingsPage.raise()
+        settingsPage.requestActivate()
     }
 
     // Top-right button to open the radio window
-    Button {
-        id: openRadioBtn
-        text: "Open Radio Console"
+    Basic.Button {
+        id: openSettingsBtn
+        text: "Settings"
         anchors.top: parent.top
         anchors.right: parent.right
-        anchors.margins: 8
-        z: 9999
-        onClicked: openRadioConsole()
+        anchors.margins: 12
+        padding: 10
+        font.pixelSize: 14
+        hoverEnabled: true
+        background: Rectangle {
+            radius: 10
+            color: openSettingsBtn.down    ? "#1f3a6d"
+                 : openSettingsBtn.hovered ? "#1b335f"
+                 :                      "#152844"
+            border.width: 1
+            border.color: "#2c4a7a"
+        }
+        contentItem: Text {
+            anchors.centerIn: parent
+            text: openSettingsBtn.text
+            color: "#c8ddff"
+            font: openSettingsBtn.font
+        }
+        onClicked: openSettingsPage()
     }
 
 }
