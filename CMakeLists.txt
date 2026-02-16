@@ -13,6 +13,31 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ----------------------------------------------------------------------
+# rocket-protocol-lib sources
+# ----------------------------------------------------------------------
+set(ROCKET_PROTOCOL_SRC
+    ${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/src/codec.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/src/cobs/cobs.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/src/crc/crc16.c
+)
+
+# ----------------------------------------------------------------------
+# Add nanopb
+# ----------------------------------------------------------------------
+set(NANOPB_SRC
+    ${CMAKE_CURRENT_SOURCE_DIR}/nanopb/pb_encode.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/nanopb/pb_decode.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/nanopb/pb_common.c
+)
+
+# ----------------------------------------------------------------------
+# Add Protobuf generated files
+# ----------------------------------------------------------------------
+set(PROTOBUF_SRC
+    ${CMAKE_CURRENT_SOURCE_DIR}/flight_command.pb.c
+)
+
+# ----------------------------------------------------------------------
 # Qt 6 modules
 # ----------------------------------------------------------------------
 find_package(Qt6 REQUIRED COMPONENTS
@@ -33,6 +58,9 @@ set(SRC_DIR  "Source Files")
 set(QML_DIR  "QML Files")
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/${HEAD_DIR}")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/nanopb")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
 # ----------------------------------------------------------------------
 # C++ sources + headers
@@ -43,6 +71,9 @@ set(SRC_FILES
     "${SRC_DIR}/CommandSender.cpp"
     "${SRC_DIR}/AlarmReceiver.cpp"
     "${SRC_DIR}/SensorDataModel.cpp"
+    ${PROTOBUF_SRC}
+    ${NANOPB_SRC}
+    ${ROCKET_PROTOCOL_SRC}
 )
 
 set(HDR_FILES
@@ -59,14 +90,14 @@ qt_add_executable(ulysses_ground_control
     MACOSX_BUNDLE
     MANUAL_FINALIZATION
     ${SRC_FILES}
-    ${HDR_FILES}       # just so Qt Creator shows a Header Files group
+    ${HDR_FILES}
 )
 
 # ----------------------------------------------------------------------
-# QML module  (ALL paths here are RELATIVE, no absolute ${CMAKE_CURRENT_SOURCE_DIR})
+# QML module
 # ----------------------------------------------------------------------
 qt_add_qml_module(ulysses_ground_control
-    URI ulysses_ground_control         # import ulysses_ground_control
+    URI ulysses_ground_control
     VERSION 1.0
     QML_FILES
         "${QML_DIR}/Main.qml"

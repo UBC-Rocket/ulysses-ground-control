@@ -3,6 +3,12 @@
 
 #include <QObject>
 #include <QTimer>
+#include <cstdint>
+
+extern "C" {
+    #include "rp/codec.h"
+    #include "flight_command.pb.h"
+}
 
 class SerialBridge;
 
@@ -15,6 +21,9 @@ public:
 
     /// Send a single command string out via the given channel on the bridge.
     Q_INVOKABLE bool sendCode(int which, const QString& code);
+
+    /// Send a FlightCommand via encoded protobuf packet
+    Q_INVOKABLE bool sendFlightCommand(int which, int commandType);
 
     // -----------------------
     // Periodic test helpers

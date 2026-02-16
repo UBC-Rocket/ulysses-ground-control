@@ -287,3 +287,22 @@ void SerialBridge::handleError(int which, QSerialPort::SerialPortError e) {
     auto& p = (which == 1) ? m_p1 : m_p2;
     emitError(QStringLiteral("Serial error on P%1: %2").arg(which).arg(p.errorString()));
 }
+
+bool SerialBridge::sendBinary(int which, const QByteArray& data) {
+    auto b = bundle(which);
+    if (!b.port.isOpen()) {
+        emitError(QString("sendBinary: P%1 not open").arg(which));
+        return false;
+    }
+    
+    const qint64 n = b.port.write(data);
+    if (n < 0) {
+        emitError(QStringLiteral("Binary write failed on P%1: %2")
+                  .arg(which).arg(b.port.errorString()));
+        return false;
+    }
+    
+    b.port.flush();
+    b.port.waitForBytesWritten(10);
+    return true;
+}

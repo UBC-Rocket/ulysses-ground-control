@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+message FlightCommand {
+  enum CommandType {
+    COMMAND_NONE = 0;
+    COMMAND_LAUNCH = 1;
+    COMMAND_ABORT = 2;
+  }
+  
+  CommandType type = 1;
+}

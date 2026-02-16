@@ -1,6 +1,10 @@
 #include "CommandSender.h"
 #include "SerialBridge.h"
 #include <QTimer>
+extern "C" {
+    #include "rp/codec.h"
+    #include "flight_command.pb.h"
+}
 
 CommandSender::CommandSender(SerialBridge* bridge, QObject* parent)
     : m_bridge(bridge), QObject(parent)
@@ -85,4 +89,45 @@ bool CommandSender::isPeriodicRunning(int which) const {
         return false;
 
     return chan(which).timer.isActive();  // True if the periodic timer is currently running.
+}
+
+bool CommandSender::sendFlightCommand(int which, int commandType) {
+    if (!validWhich(which)) {
+        emit errorOccurred("which must be 1 or 2");
+        return false;
+    }
+    
+    if (!m_bridge) {
+        emit errorOccurred("No bridge");
+        return false;
+    }
+    
+    // 1. Create FlightCommand message
+    FlightCommand cmd = FlightCommand_init_zero;
+    cmd.type = static_cast<FlightCommand_CommandType>(commandType);
+    
+    // 2. Encode to COBS packet
+    uint8_t packet[300];
+    rp_packet_encode_result_t result = rp_packet_encode(
+        packet,
+        sizeof(packet),
+        FlightCommand_fields,
+        &cmd
+    );
+    
+    if (result.status != RP_CODEC_OK) {
+        emit errorOccurred("Failed to encode packet");
+        return false;
+    }
+    
+    // 3. Send binary packet
+    QByteArray data(reinterpret_cast<const char*>(packet), result.written);
+    
+    if (!m_bridge->sendBinary(which, data)) {
+        emit errorOccurred("Failed to send binary packet");
+        return false;
+    }
+    
+    emit messageSent(QString("FlightCommand %1").arg(commandType));
+    return true;
 }

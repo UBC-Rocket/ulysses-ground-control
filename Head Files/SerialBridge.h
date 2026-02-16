@@ -42,6 +42,9 @@ public:
     /// Send a line of text out through the selected port (1 or 2); returns true on success.
     Q_INVOKABLE bool sendText(int which, const QString& text);
 
+    /// Send raw binary data (for encoded packets)
+    Q_INVOKABLE bool sendBinary(int which, const QByteArray& data);
+
     // -----------------------
     // Property getters
     // -----------------------
