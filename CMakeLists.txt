@@ -34,7 +34,8 @@ set(NANOPB_SRC
 # Add Protobuf generated files
 # ----------------------------------------------------------------------
 set(PROTOBUF_SRC
-    ${CMAKE_CURRENT_SOURCE_DIR}/flight_command.pb.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/generated/tvr/command.pb.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/generated/tvr/common.pb.c
 )
 
 # ----------------------------------------------------------------------

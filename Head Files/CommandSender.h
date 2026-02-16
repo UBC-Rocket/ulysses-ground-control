@@ -7,7 +7,7 @@
 
 extern "C" {
     #include "rp/codec.h"
-    #include "flight_command.pb.h"
+    #include "command.pb.h"
 }
 
 class SerialBridge;

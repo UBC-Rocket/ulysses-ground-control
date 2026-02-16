@@ -3,7 +3,7 @@
 #include <QTimer>
 extern "C" {
     #include "rp/codec.h"
-    #include "flight_command.pb.h"
+    #include "command.pb.h"
 }
 
 CommandSender::CommandSender(SerialBridge* bridge, QObject* parent)
@@ -103,8 +103,9 @@ bool CommandSender::sendFlightCommand(int which, int commandType) {
     }
     
     // 1. Create FlightCommand message
-    FlightCommand cmd = FlightCommand_init_zero;
-    cmd.type = static_cast<FlightCommand_CommandType>(commandType);
+    tvr_FlightCommand cmd = tvr_FlightCommand_init_zero;
+    cmd.which_payload = tvr_FlightCommand_state_cmd_tag;  // Set oneof
+    cmd.payload.state_cmd.type = (tvr_StateCommand_Type)commandType;  // Set type
     
     // 2. Encode to COBS packet
     uint8_t packet[300];
