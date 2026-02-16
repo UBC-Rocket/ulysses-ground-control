@@ -112,7 +112,7 @@ bool CommandSender::sendFlightCommand(int which, int commandType) {
     rp_packet_encode_result_t result = rp_packet_encode(
         packet,
         sizeof(packet),
-        FlightCommand_fields,
+        tvr_FlightCommand_fields,
         &cmd
     );
     
