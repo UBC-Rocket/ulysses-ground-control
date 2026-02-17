@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 
 project(ulysses_ground_control
     VERSION 0.1.0
-    LANGUAGES CXX
+    LANGUAGES CXX C
 )
 
 set(CMAKE_AUTOMOC ON)
@@ -54,12 +54,13 @@ find_package(Qt6 REQUIRED COMPONENTS
 # ----------------------------------------------------------------------
 # Paths (relative to project root)
 # ----------------------------------------------------------------------
-set(HEAD_DIR "Head Files")
-set(SRC_DIR  "Source Files")
-set(QML_DIR  "QML Files")
+set(HEAD_DIR "HeadFiles")
+set(SRC_DIR  "SourceFiles")
+set(QML_DIR  "QMLFiles")
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/${HEAD_DIR}")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/generated/tvr")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/nanopb")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -82,6 +83,8 @@ set(HDR_FILES
     "${HEAD_DIR}/CommandSender.h"
     "${HEAD_DIR}/AlarmReceiver.h"
     "${HEAD_DIR}/SensorDataModel.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/generated/tvr/command.pb.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/include/rp/codec.h"
 )
 
 # ----------------------------------------------------------------------
