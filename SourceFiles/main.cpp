@@ -7,6 +7,7 @@
 #include "SerialBridge.h"
 #include "SensorDataModel.h"
 #include "CommandSender.h"
+#include "DownlinkDecoder.h"
 #include "AlarmReceiver.h"
 
 int main(int argc, char *argv[])
@@ -16,14 +17,16 @@ int main(int argc, char *argv[])
 
     // Backend objects live for the duration of main
     SerialBridge bridge;
-    CommandSender  commandsender(&bridge);   // sends commands via bridge
-    AlarmReceiver  alarmreceiver(&bridge);   // receives/decodes alarms via bridge
+    CommandSender   commandsender(&bridge);   // sends commands via bridge
+    DownlinkDecoder downlinkDecoder(&bridge); // decodes FC downlink packets
+    AlarmReceiver   alarmreceiver(&bridge);   // receives/decodes alarms via bridge
     SensorDataModel sensorData(&bridge);
 
     // QML engine + expose C++ backends to QML by name
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("bridge", &bridge);
     engine.rootContext()->setContextProperty("commandsender", &commandsender);
+    engine.rootContext()->setContextProperty("downlinkDecoder", &downlinkDecoder);
     engine.rootContext()->setContextProperty("alarmreceiver", &alarmreceiver);
     engine.rootContext()->setContextProperty("sensorData", &sensorData);
 

@@ -240,9 +240,15 @@ bool SerialBridge::sendText(int which, const QString& text) {
 
 void SerialBridge::handleReadyRead(int which) {
     auto b = bundle(which);
-    b.rxBuf.append(b.port.readAll()); // Append any newly arrived data into the buffer.
+    const QByteArray raw = b.port.readAll();
+    b.rxBuf.append(raw);
 
-    // While TX pause is active we only accumulate data, we don't parse lines yet.
+    // Feed the same bytes into the binary accumulator for COBS framing.
+    QByteArray &binBuf = (which == 1) ? m_bin1_buffer : m_bin2_buffer;
+    binBuf.append(raw);
+    parseBinaryPackets(which);
+
+    // While TX pause is active we only accumulate text data, we don't parse lines yet.
     if (isRxPause())
         return;
 
@@ -286,6 +292,20 @@ void SerialBridge::handleError(int which, QSerialPort::SerialPortError e) {
 
     auto& p = (which == 1) ? m_p1 : m_p2;
     emitError(QStringLiteral("Serial error on P%1: %2").arg(which).arg(p.errorString()));
+}
+
+void SerialBridge::parseBinaryPackets(int which) {
+    QByteArray &buf = (which == 1) ? m_bin1_buffer : m_bin2_buffer;
+
+    int idx;
+    while ((idx = buf.indexOf('\0')) != -1) {
+        // Everything before the delimiter is one COBS packet.
+        QByteArray packet = buf.left(idx);
+        buf.remove(0, idx + 1); // Remove packet + delimiter.
+
+        if (!packet.isEmpty())
+            emit binaryReceivedFrom(which, packet);
+    }
 }
 
 bool SerialBridge::sendBinary(int which, const QByteArray& data) {

@@ -36,6 +36,9 @@ set(NANOPB_SRC
 set(PROTOBUF_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/generated/tvr/command.pb.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/generated/tvr/common.pb.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/generated/tvr/downlink.pb.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/generated/tvr/telemetry.pb.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/generated/tvr/status.pb.c
 )
 
 # ----------------------------------------------------------------------
@@ -71,6 +74,7 @@ set(SRC_FILES
     "${SRC_DIR}/main.cpp"
     "${SRC_DIR}/SerialBridge.cpp"
     "${SRC_DIR}/CommandSender.cpp"
+    "${SRC_DIR}/DownlinkDecoder.cpp"
     "${SRC_DIR}/AlarmReceiver.cpp"
     "${SRC_DIR}/SensorDataModel.cpp"
     ${PROTOBUF_SRC}
@@ -81,6 +85,7 @@ set(SRC_FILES
 set(HDR_FILES
     "${HEAD_DIR}/SerialBridge.h"
     "${HEAD_DIR}/CommandSender.h"
+    "${HEAD_DIR}/DownlinkDecoder.h"
     "${HEAD_DIR}/AlarmReceiver.h"
     "${HEAD_DIR}/SensorDataModel.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/generated/tvr/command.pb.h"
