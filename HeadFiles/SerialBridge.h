@@ -99,6 +99,9 @@ signals:
     /// Emitted when a full line of text has been received from the given port.
     void textReceivedFrom(int which, const QString &line);
 
+    /// Emitted when a complete binary (COBS) packet has been received (0x00-delimited).
+    void binaryPacketReceived(int which, const QByteArray &packet);
+
     /// Emitted for user-visible error messages (shown in QML popup).
     void errorMessage(const QString &msg);
 
@@ -157,6 +160,9 @@ private:
 
     /// Split accumulated RX buffer into complete lines and emit textReceivedFrom().
     void parseBufferedLines(int which);
+
+    /// Split RX buffer on COBS delimiter (0x00), emit binaryPacketReceived() for each packet.
+    void parseBufferedBinary(int which);
 
     // -----------------------
     // Members

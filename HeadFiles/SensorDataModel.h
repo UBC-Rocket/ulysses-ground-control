@@ -55,6 +55,9 @@ public slots:
     /// Entry point for raw text lines; usually connected to SerialBridge::textReceivedFrom().
     void onLineReceived(const QString& line);
 
+    /// Entry point for binary COBS packets; decode Downlink and update model.
+    void onBinaryPacketReceived(int which, const QByteArray& packet);
+
     /// Store Kalman filter angles and notify QML.
     void updateKalman(double rawAngleX, double filteredAngleX,
                       double rawAngleY, double filteredAngleY,
@@ -92,6 +95,9 @@ private:
 
     /// Parse a CSV line into individual sensor values and update stored properties.
     void parseIncomingData(const QString& line);
+
+    /// Update model from decoded Downlink (TelemetryState or SystemStatus).
+    void applyDownlink(int which, const void* downlinkStruct);
 
     SerialBridge* m_bridge = nullptr;  ///< Non-owning pointer to the serial bridge used as data source.
 };

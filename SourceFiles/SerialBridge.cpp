@@ -233,7 +233,7 @@ bool SerialBridge::sendText(int which, const QString& text) {
 
     if (shared) {
         endRxPause();
-        parseBufferedLines(which);  // Process anything that arrived during the pause.
+        parseBufferedBinary(which);  // Process anything that arrived during the pause.
     }
     return true;
 }
@@ -242,11 +242,12 @@ void SerialBridge::handleReadyRead(int which) {
     auto b = bundle(which);
     b.rxBuf.append(b.port.readAll()); // Append any newly arrived data into the buffer.
 
-    // While TX pause is active we only accumulate data, we don't parse lines yet.
+    // While TX pause is active we only accumulate data, we don't parse yet.
     if (isRxPause())
         return;
 
-    parseBufferedLines(which);
+    // Parse as binary COBS packets (0x00-delimited). Sender uses COBS+protobuf, not text.
+    parseBufferedBinary(which);
 }
 
 void SerialBridge::parseBufferedLines(int which) {
@@ -276,6 +277,24 @@ void SerialBridge::parseBufferedLines(int which) {
 
         // Emit a clean logical line to whoever is listening (QML, alarm system, etc.).
         emit textReceivedFrom(which, text);
+    }
+}
+
+void SerialBridge::parseBufferedBinary(int which) {
+    auto b = bundle(which);
+
+    b.rxBuf.append(b.port.readAll());
+
+    // COBS packets are delimited by 0x00. Consume each complete packet.
+    int idx;
+    while ((idx = b.rxBuf.indexOf('\0')) != -1) {
+        // Packet is from start up to and including the delimiter (COBS decode expects it).
+        QByteArray packet = b.rxBuf.left(idx + 1);
+        b.rxBuf.remove(0, idx + 1);
+
+        if (!packet.isEmpty()) {
+            emit binaryPacketReceived(which, packet);
+        }
     }
 }
 

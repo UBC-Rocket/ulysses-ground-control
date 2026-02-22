@@ -1,8 +1,35 @@
 #include "SensorDataModel.h"
 #include "SerialBridge.h"
+#include "rp/codec.h"
+#include "downlink.pb.h"
 #include <QDebug>
+#include <QtMath>
+#include <cmath>
 
 static constexpr bool kSerialDebug = false;
+
+namespace {
+// Quaternion (w,x,y,z) to Euler angles (roll, pitch, yaw) in radians.
+void quatToEulerRad(float w, float x, float y, float z,
+                    float* roll_rad, float* pitch_rad, float* yaw_rad) {
+    double sinp = 2.0 * (w * y - z * x);
+    if (std::abs(sinp) >= 1) {
+        *pitch_rad = static_cast<float>(std::copysign(M_PI / 2, sinp));
+    } else {
+        *pitch_rad = static_cast<float>(std::asin(sinp));
+    }
+    double siny_cosp = 2.0 * (w * z + x * y);
+    double cosy_cosp = 1.0 - 2.0 * (y * y + z * z);
+    *yaw_rad = static_cast<float>(std::atan2(siny_cosp, cosy_cosp));
+    double sinr_cosp = 2.0 * (w * x + y * z);
+    double cosr_cosp = 1.0 - 2.0 * (x * x + y * y);
+    *roll_rad = static_cast<float>(std::atan2(sinr_cosp, cosr_cosp));
+}
+
+float radToDeg(float rad) {
+    return static_cast<float>(rad * 180.0 / M_PI);
+}
+} // namespace
 
 SensorDataModel::SensorDataModel(SerialBridge* bridge, QObject* parent)
     : m_bridge(bridge), QObject(parent)
@@ -10,41 +37,56 @@ SensorDataModel::SensorDataModel(SerialBridge* bridge, QObject* parent)
     if (!m_bridge)
         return; // No source of lines if bridge is null.
 
-    // Subscribe once to SerialBridge lines and decide here whether to use each one.
+    // Subscribe to binary COBS packets (primary: rocket sends COBS+protobuf Downlink).
+    QObject::connect(
+        m_bridge,
+        &SerialBridge::binaryPacketReceived,
+        this,
+        [this](int which, const QByteArray &packet) {
+            if (!m_bridge) return;
+            const bool p1 = m_bridge->isConnected(1);
+            const bool p2 = m_bridge->isConnected(2);
+            bool listen = (p1 && p2) ? (which == 1) : m_bridge->isConnected(which);
+            if (listen)
+                onBinaryPacketReceived(which, packet);
+        });
+
+    // Also subscribe to text lines (e.g. legacy CSV or debug output).
     QObject::connect(
         m_bridge,
         &SerialBridge::textReceivedFrom,
         this,
         [this](int which, const QString &line) {
-            if (!m_bridge)
-                return; // Bridge pointer was cleared; ignore.
-
+            if (!m_bridge) return;
             const bool p1 = m_bridge->isConnected(1);
             const bool p2 = m_bridge->isConnected(2);
-
-            bool listen = false;
-
-            if (p1 && p2) {
-                // Both ports up: treat port 1 as the primary sensor source.
-                listen = (which == 1);
-            } else if (p1 || p2) {
-                // Only one port connected: accept data only from that port.
-                listen = m_bridge->isConnected(which);
-            } else {
-                // No ports connected: drop everything.
-                listen = false;
-            }
-
-            if (listen) {
-                onLineReceived(line); // Forward accepted lines into the parser.
-            }
-        }
-        );
+            bool listen = (p1 && p2) ? (which == 1) : m_bridge->isConnected(which);
+            if (listen)
+                onLineReceived(line);
+        });
 }
 
 void SensorDataModel::onLineReceived(const QString& line)
 {
     parseIncomingData(line);
+}
+
+void SensorDataModel::onBinaryPacketReceived(int which, const QByteArray& packet)
+{
+    if (packet.isEmpty())
+        return;
+
+    tvr_Downlink downlink = tvr_Downlink_init_default;
+    const uint8_t* data = reinterpret_cast<const uint8_t*>(packet.constData());
+    size_t size = static_cast<size_t>(packet.size());
+
+    rp_packet_decode_result_t result =
+        rp_packet_decode(data, size, &tvr_Downlink_msg, &downlink);
+
+    if (result.status != RP_CODEC_OK)
+        return; // Bad checksum or malformed packet; skip silently or log occasionally.
+
+    applyDownlink(which, &downlink);
 }
 
 void SensorDataModel::parseIncomingData(const QString& line)
@@ -127,4 +169,45 @@ void SensorDataModel::updateTelemetry(double velocity, double temperature,
     m_battery = battery;
 
     emit telemetryDataChanged();
+}
+
+void SensorDataModel::applyDownlink(int which, const void* downlinkStruct)
+{
+    const tvr_Downlink* d = static_cast<const tvr_Downlink*>(downlinkStruct);
+
+    if (d->which_payload == tvr_Downlink_telemetry_tag) {
+        const tvr_TelemetryState* t = &d->payload.telemetry;
+
+        // Velocity magnitude (m/s)
+        double vel = 0.0;
+        if (t->has_velocity) {
+            const tvr_Vec3* v = &t->velocity;
+            double vx = static_cast<double>(v->x), vy = static_cast<double>(v->y), vz = static_cast<double>(v->z);
+            vel = std::sqrt(vx * vx + vy * vy + vz * vz);
+        }
+
+        // Euler angles (deg) from quaternion; use for both raw and filtered.
+        double ax = 0.0, ay = 0.0, az = 0.0;
+        if (t->has_attitude) {
+            float roll, pitch, yaw;
+            quatToEulerRad(t->attitude.w, t->attitude.x, t->attitude.y, t->attitude.z,
+                           &roll, &pitch, &yaw);
+            ax = radToDeg(roll);
+            ay = radToDeg(pitch);
+            az = radToDeg(yaw);
+        }
+
+        // Altitude from position.z (m); pressure not in proto, leave 0.
+        double alt = 0.0;
+        if (t->has_position)
+            alt = static_cast<double>(t->position.z);
+
+        updateKalman(ax, ax, ay, ay, az, az);
+        updateBaro(0.0, alt);
+        updateTelemetry(vel, 0.0, m_signal, m_battery); // keep last signal/battery
+    } else if (d->which_payload == tvr_Downlink_status_tag) {
+        const tvr_SystemStatus* s = &d->payload.status;
+        // Expose radio RX count as "signal" for link health; leave others unchanged.
+        updateTelemetry(m_velocity, m_temperature, static_cast<double>(s->radio_rx_count), m_battery);
+    }
 }

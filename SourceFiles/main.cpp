@@ -36,7 +36,8 @@ int main(int argc, char *argv[])
         Qt::QueuedConnection);
 
     // Load the QML entry point from the compiled QML module
-    const QUrl url(u"qrc:/ulysses_ground_control/QMLFiles/Main.qml"_qs);
+    using namespace Qt::StringLiterals;
+    const QUrl url(u"qrc:/ulysses_ground_control/QMLFiles/Main.qml"_s);
     engine.load(url);
 
     // Safety check: no root objects means load failed
