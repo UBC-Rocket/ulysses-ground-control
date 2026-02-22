@@ -4,7 +4,6 @@ extern "C" {
     #include "rp/codec.h"
     #include "downlink.pb.h"
 }
-#include "downlink.pb.h"
 #include <QDebug>
 #include <QtMath>
 #include <cmath>

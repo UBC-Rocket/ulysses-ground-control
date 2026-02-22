@@ -67,6 +67,7 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/generated/t
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/nanopb")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
+file(GLOB_RECURSE MESH_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "QMLFiles/meshes/*.mesh")
 # ----------------------------------------------------------------------
 # C++ sources + headers
 # ----------------------------------------------------------------------
@@ -117,6 +118,7 @@ qt_add_qml_module(ulysses_ground_control
         "${QML_DIR}/Panel_PID_Slider.qml"
         "${QML_DIR}/Panel_Kalman_and_Engine.qml"
         "${QML_DIR}/Panel_Rocket_Visualization.qml"
+        "${QML_DIR}/FullDroneAssembly.qml"
         "${QML_DIR}/Panel_System_Alert.qml"
         "${QML_DIR}/Panel_Test.qml"
         "${QML_DIR}/RadioTestWindow.qml"
@@ -126,6 +128,8 @@ qt_add_qml_module(ulysses_ground_control
         "${QML_DIR}/Items/Data.qml"
         "${QML_DIR}/Items/DataBox.qml"
         "${QML_DIR}/Items/DataBoxList.qml"
+    RESOURCES
+        "${MESH_FILES}"
 )
 
 # ----------------------------------------------------------------------
