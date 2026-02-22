@@ -101,6 +101,7 @@ signals:
 
     /// Emitted when a complete binary COBS packet (delimited by 0x00) arrives.
     void binaryReceivedFrom(int which, const QByteArray &packet);
+
     /// Emitted when a complete binary (COBS) packet has been received (0x00-delimited).
     void binaryPacketReceived(int which, const QByteArray &packet);
 
