@@ -1,0 +1,6 @@
+[submodule "rocket-protocol-lib"]
+	path = rocket-protocol-lib
+	url = https://github.com/UBC-Rocket/rocket-protocol-lib.git
+[submodule "nanopb"]
+	path = nanopb
+	url = https://github.com/nanopb/nanopb.git

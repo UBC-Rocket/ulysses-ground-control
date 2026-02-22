@@ -119,7 +119,7 @@ Rectangle {
             Loader {
                 anchors.fill: parent
                 sourceComponent: cmdCard
-                onLoaded: { item.title = "Hover";    item.cmd = "H" } // Initialize instance properties.
+                onLoaded: { item.title = "Arm";    item.cmd = 1 } // Initialize instance properties.
             }
         }
 
@@ -130,7 +130,7 @@ Rectangle {
             Loader {
                 anchors.fill: parent
                 sourceComponent: cmdCard
-                onLoaded: { item.title = "Fly Up";   item.cmd = "U" }
+                onLoaded: { item.title = "Launch";   item.cmd = 2 }
             }
         }
 
@@ -141,7 +141,7 @@ Rectangle {
             Loader {
                 anchors.fill: parent
                 sourceComponent: cmdCard
-                onLoaded: { item.title = "Fly Down"; item.cmd = "D" }
+                onLoaded: { item.title = "Abort"; item.cmd = 3 }
             }
         }
 
@@ -152,7 +152,7 @@ Rectangle {
             Loader {
                 anchors.fill: parent
                 sourceComponent: cmdCard
-                onLoaded: { item.title = "Idle";     item.cmd = "I" }
+                onLoaded: { item.title = "Land";     item.cmd = 4 }
             }
         }
     }
@@ -161,7 +161,7 @@ Rectangle {
     Connections {
         target: control_panel
         function onCommandTriggered(txWhich, code) {
-            commandsender.sendCode(txWhich, code) // Delegate to Q_INVOKABLE; panel stays transport-agnostic.
+            commandsender.sendFlightCommand(txWhich, code) // Delegate to Q_INVOKABLE; panel stays transport-agnostic.
         }
     }
 }

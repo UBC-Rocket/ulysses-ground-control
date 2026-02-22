@@ -42,6 +42,9 @@ public:
     /// Send a line of text out through the selected port (1 or 2); returns true on success.
     Q_INVOKABLE bool sendText(int which, const QString& text);
 
+    /// Send raw binary data (for encoded packets)
+    Q_INVOKABLE bool sendBinary(int which, const QByteArray& data);
+
     // -----------------------
     // Property getters
     // -----------------------
@@ -95,6 +98,11 @@ signals:
 
     /// Emitted when a full line of text has been received from the given port.
     void textReceivedFrom(int which, const QString &line);
+
+    /// Emitted when a complete binary COBS packet (delimited by 0x00) arrives.
+    void binaryReceivedFrom(int which, const QByteArray &packet);
+    /// Emitted when a complete binary (COBS) packet has been received (0x00-delimited).
+    void binaryPacketReceived(int which, const QByteArray &packet);
 
     /// Emitted for user-visible error messages (shown in QML popup).
     void errorMessage(const QString &msg);
@@ -155,12 +163,18 @@ private:
     /// Split accumulated RX buffer into complete lines and emit textReceivedFrom().
     void parseBufferedLines(int which);
 
+    /// Extract complete COBS packets (delimited by 0x00) and emit binaryReceivedFrom().
+    void parseBinaryPackets(int which);
+    /// Split RX buffer on COBS delimiter (0x00), emit binaryPacketReceived() for each packet.
+    void parseBufferedBinary(int which);
+
     // -----------------------
     // Members
     // -----------------------
 
     QSerialPort m_p1, m_p2;          ///< Underlying serial ports for channel 1 and 2.
     QByteArray m_rx1_buffer, m_rx2_buffer;  ///< Line-assembly buffers for each port.
+    QByteArray m_bin1_buffer, m_bin2_buffer; ///< Binary COBS packet accumulation buffers.
 
     int m_rxFrom = 1;                ///< Current port index used as RX source.
     int m_txTo   = 2;                ///< Current port index used as TX destination.

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 
 project(ulysses_ground_control
     VERSION 0.1.0
-    LANGUAGES CXX
+    LANGUAGES CXX C
 )
 
 set(CMAKE_AUTOMOC ON)
@@ -11,6 +11,35 @@ set(CMAKE_AUTOUIC ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# ----------------------------------------------------------------------
+# rocket-protocol-lib sources
+# ----------------------------------------------------------------------
+set(ROCKET_PROTOCOL_SRC
+    ${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/src/codec.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/src/cobs/cobs.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/src/crc/crc16.c
+)
+
+# ----------------------------------------------------------------------
+# Add nanopb
+# ----------------------------------------------------------------------
+set(NANOPB_SRC
+    ${CMAKE_CURRENT_SOURCE_DIR}/nanopb/pb_encode.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/nanopb/pb_decode.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/nanopb/pb_common.c
+)
+
+# ----------------------------------------------------------------------
+# Add Protobuf generated files
+# ----------------------------------------------------------------------
+set(PROTOBUF_SRC
+    ${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/generated/tvr/command.pb.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/generated/tvr/common.pb.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/generated/tvr/status.pb.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/generated/tvr/telemetry.pb.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/generated/tvr/downlink.pb.c
+)
 
 # ----------------------------------------------------------------------
 # Qt 6 modules
@@ -28,11 +57,15 @@ find_package(Qt6 REQUIRED COMPONENTS
 # ----------------------------------------------------------------------
 # Paths (relative to project root)
 # ----------------------------------------------------------------------
-set(HEAD_DIR "Head Files")
-set(SRC_DIR  "Source Files")
-set(QML_DIR  "QML Files")
+set(HEAD_DIR "HeadFiles")
+set(SRC_DIR  "SourceFiles")
+set(QML_DIR  "QMLFiles")
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/${HEAD_DIR}")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/generated/tvr")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/nanopb")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
 # ----------------------------------------------------------------------
 # C++ sources + headers
@@ -41,15 +74,22 @@ set(SRC_FILES
     "${SRC_DIR}/main.cpp"
     "${SRC_DIR}/SerialBridge.cpp"
     "${SRC_DIR}/CommandSender.cpp"
+    "${SRC_DIR}/DownlinkDecoder.cpp"
     "${SRC_DIR}/AlarmReceiver.cpp"
     "${SRC_DIR}/SensorDataModel.cpp"
+    ${PROTOBUF_SRC}
+    ${NANOPB_SRC}
+    ${ROCKET_PROTOCOL_SRC}
 )
 
 set(HDR_FILES
     "${HEAD_DIR}/SerialBridge.h"
     "${HEAD_DIR}/CommandSender.h"
+    "${HEAD_DIR}/DownlinkDecoder.h"
     "${HEAD_DIR}/AlarmReceiver.h"
     "${HEAD_DIR}/SensorDataModel.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/generated/tvr/command.pb.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/include/rp/codec.h"
 )
 
 # ----------------------------------------------------------------------
@@ -59,14 +99,14 @@ qt_add_executable(ulysses_ground_control
     MACOSX_BUNDLE
     MANUAL_FINALIZATION
     ${SRC_FILES}
-    ${HDR_FILES}       # just so Qt Creator shows a Header Files group
+    ${HDR_FILES}
 )
 
 # ----------------------------------------------------------------------
-# QML module  (ALL paths here are RELATIVE, no absolute ${CMAKE_CURRENT_SOURCE_DIR})
+# QML module
 # ----------------------------------------------------------------------
 qt_add_qml_module(ulysses_ground_control
-    URI ulysses_ground_control         # import ulysses_ground_control
+    URI ulysses_ground_control
     VERSION 1.0
     QML_FILES
         "${QML_DIR}/Main.qml"
