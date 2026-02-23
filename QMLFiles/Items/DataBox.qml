@@ -6,6 +6,14 @@ Rectangle {
     property int sections       //How many boxes are together
     property int section_num    //Which box is this one
 
+    function formatDataValue(value) {
+        const numericValue = Number(value)
+        if (!Number.isFinite(numericValue)) {
+            return String(value)
+        }
+        return numericValue.toFixed(2)
+    }
+
     height: 50
     width: (parent.width-18*sections)/sections
     x: (section_num-1) * (width+10)
@@ -29,7 +37,7 @@ Rectangle {
         id: value
 
         anchors.top: name.bottom
-        text: dataValue
+        text: formatDataValue(dataValue)
         font.pixelSize: 14
         color: "#729AAF"
 

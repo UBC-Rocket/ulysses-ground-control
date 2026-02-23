@@ -120,6 +120,7 @@ qt_add_qml_module(ulysses_ground_control
         "${QML_DIR}/Panel_Rocket_Visualization.qml"
         "${QML_DIR}/FullDroneAssembly.qml"
         "${QML_DIR}/Panel_System_Alert.qml"
+        "${QML_DIR}/Panel_System_Health.qml"
         "${QML_DIR}/Panel_Test.qml"
         "${QML_DIR}/RadioTestWindow.qml"
         "${QML_DIR}/Shortcuts.qml"

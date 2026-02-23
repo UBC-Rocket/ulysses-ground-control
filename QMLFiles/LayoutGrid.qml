@@ -54,9 +54,16 @@ GridLayout {
 
     // Panel_System_Alert
     Item {
-        Layout.row: 1; Layout.column: 2; Layout.columnSpan: 2
+        Layout.row: 1; Layout.column: 2
         Layout.fillWidth: true; Layout.fillHeight: true
         Panel_System_Alert { anchors.fill: parent }
+    }
+
+    // Panel_System_Health
+    Item {
+        Layout.row: 1; Layout.column: 3
+        Layout.fillWidth: true; Layout.fillHeight: true
+        Panel_System_Health { anchors.fill: parent }
     }
 }
 

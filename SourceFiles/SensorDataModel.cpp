@@ -103,7 +103,7 @@ void SensorDataModel::parseIncomingData(const QString& line)
     // Expected format (12 fields):
     // pressure,altitude,raw_angle_x,filtered_angle_x,raw_angle_y,filtered_angle_y,raw_angle_z,filtered_angle_z,velocity,temperature,signal,battery
     if (parts.size() != 12) {
-        // Throttle warnings so high-rate streams don’t flood the log.
+        // Throttle warnings so high-rate streams don't flood the log.
         static int errorCount = 0;
         if (++errorCount % 50 == 0) {
             qWarning() << "Expected 12 CSV fields, got"
@@ -123,18 +123,18 @@ void SensorDataModel::parseIncomingData(const QString& line)
     double velocity        = parts[8].toDouble();
     double temperature     = parts[9].toDouble();
     double signal          = parts[10].toDouble();
-    double battery         = parts[11].toDouble();
+    double radioTxCount    = parts[11].toDouble();
 
     if (kSerialDebug) {
         qDebug() << "| Baro:" << pressure << altitude
                  << "| Kalman:" << rawAngleX << filteredAngleX << rawAngleY << filteredAngleY << rawAngleZ << filteredAngleZ
-                 << "| Telemetry:" << velocity << temperature << signal << battery;
+                 << "| Telemetry:" << velocity << temperature << signal << radioTxCount;
     }
 
     // Update grouped values and notify QML bindings.
     updateKalman(rawAngleX, filteredAngleX, rawAngleY, filteredAngleY, rawAngleZ, filteredAngleZ);
     updateBaro(pressure, altitude);
-    updateTelemetry(velocity, temperature, signal, battery);
+    updateTelemetry(velocity, temperature, signal, radioTxCount);
 }
 
 void SensorDataModel::updateKalman(double rawAngleX, double filteredAngleX,
@@ -152,23 +152,34 @@ void SensorDataModel::updateKalman(double rawAngleX, double filteredAngleX,
     emit kalmanDataChanged();
 }
 
-void SensorDataModel::updateBaro(double pressure, double altitude)
+void SensorDataModel::updateBaro(double pressure, double altitude, double posX, double posY)
 {
-    // Cache latest barometric readings and notify QML bindings.
+    // Cache latest barometric/position readings and notify QML bindings.
     m_pressure = pressure;
     m_altitude = altitude;
+    m_posX     = posX;
+    m_posY     = posY;
 
     emit baroDataChanged();
 }
 
+void SensorDataModel::updateEngine(double thrustCmd, double gimbalX, double gimbalY)
+{
+    m_thrustCmd = thrustCmd;
+    m_gimbalX   = gimbalX;
+    m_gimbalY   = gimbalY;
+
+    emit engineDataChanged();
+}
+
 void SensorDataModel::updateTelemetry(double velocity, double temperature,
-                                      double signal, double battery)
+                                      double signal, double radioTxCount)
 {
     // Cache latest telemetry and notify QML bindings.
-    m_velocity = velocity;
-    m_temperature = temperature;
-    m_signal = signal;
-    m_battery = battery;
+    m_velocity     = velocity;
+    m_temperature  = temperature;
+    m_signal       = signal;
+    m_radioTxCount = radioTxCount;
 
     emit telemetryDataChanged();
 }
@@ -180,36 +191,55 @@ void SensorDataModel::applyDownlink(int which, const void* downlinkStruct)
     if (d->which_payload == tvr_Downlink_telemetry_tag) {
         const tvr_TelemetryState* t = &d->payload.telemetry;
 
-        // Velocity magnitude (m/s)
+        // Velocity magnitude [m/s] → km/h
         double vel = 0.0;
         if (t->has_velocity) {
             const tvr_Vec3* v = &t->velocity;
             double vx = static_cast<double>(v->x), vy = static_cast<double>(v->y), vz = static_cast<double>(v->z);
-            vel = std::sqrt(vx * vx + vy * vy + vz * vz);
+            vel = std::sqrt(vx * vx + vy * vy + vz * vz) * 3.6;
         }
 
-        // Euler angles (deg) from quaternion; use for both raw and filtered.
-        double ax = 0.0, ay = 0.0, az = 0.0;
+        // Filtered Euler angles (deg) from attitude quaternion.
+        double filtX = 0.0, filtY = 0.0, filtZ = 0.0;
         if (t->has_attitude) {
             float roll, pitch, yaw;
             quatToEulerRad(t->attitude.w, t->attitude.x, t->attitude.y, t->attitude.z,
                            &roll, &pitch, &yaw);
-            ax = radToDeg(roll);
-            ay = radToDeg(pitch);
-            az = radToDeg(yaw);
+            filtX = radToDeg(roll);
+            filtY = radToDeg(pitch);
+            filtZ = radToDeg(yaw);
         }
 
-        // Altitude from position.z (m); pressure not in proto, leave 0.
-        double alt = 0.0;
-        if (t->has_position)
-            alt = static_cast<double>(t->position.z);
+        // Raw angular rates (rad/s) → deg/s for display alongside Euler angles.
+        double rawX = 0.0, rawY = 0.0, rawZ = 0.0;
+        if (t->has_angular_rate) {
+            rawX = radToDeg(t->angular_rate.x);
+            rawY = radToDeg(t->angular_rate.y);
+            rawZ = radToDeg(t->angular_rate.z);
+        }
 
-        updateKalman(ax, ax, ay, ay, az, az);
-        updateBaro(0.0, alt);
-        updateTelemetry(vel, 0.0, m_signal, m_battery); // keep last signal/battery
+        // Position [m]: altitude from z, horizontal from x/y.
+        double alt = 0.0, px = 0.0, py = 0.0;
+        if (t->has_position) {
+            alt = static_cast<double>(t->position.z);
+            px  = static_cast<double>(t->position.x);
+            py  = static_cast<double>(t->position.y);
+        }
+
+        updateKalman(rawX, filtX, rawY, filtY, rawZ, filtZ);
+        updateBaro(0.0, alt, px, py);
+        updateTelemetry(vel, 0.0, m_signal, m_radioTxCount); // keep last link stats
+        updateEngine(
+            static_cast<double>(t->thrust_cmd),
+            static_cast<double>(t->gimbal_x),
+            static_cast<double>(t->gimbal_y)
+        );
+
     } else if (d->which_payload == tvr_Downlink_status_tag) {
         const tvr_SystemStatus* s = &d->payload.status;
-        // Expose radio RX count as "signal" for link health; leave others unchanged.
-        updateTelemetry(m_velocity, m_temperature, static_cast<double>(s->radio_rx_count), m_battery);
+        // Update link stats from SystemStatus; leave other telemetry unchanged.
+        updateTelemetry(m_velocity, m_temperature,
+                        static_cast<double>(s->radio_rx_count),
+                        static_cast<double>(s->radio_tx_count));
     }
 }

@@ -10,7 +10,7 @@ extern "C" {
 DownlinkDecoder::DownlinkDecoder(SerialBridge* bridge, QObject* parent)
     : QObject(parent), m_bridge(bridge)
 {
-    connect(m_bridge, &SerialBridge::binaryReceivedFrom,
+    connect(m_bridge, &SerialBridge::binaryPacketReceived,
             this, &DownlinkDecoder::onBinaryReceived);
 }
 

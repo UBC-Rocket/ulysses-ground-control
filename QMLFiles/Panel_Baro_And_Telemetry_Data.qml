@@ -4,23 +4,25 @@ import "Items"
 BasePanel {
     id: panel_Baro_And_Telemetry
 
-    // Barometer Data
-    property double pressure: sensorData.pressure
+    // Position
+    property double posX: sensorData.posX
+    property double posY: sensorData.posY
     property double altitude: sensorData.altitude
 
-    // Telemetry Data
+    // Telemetry
     property double velocity: sensorData.velocity
-    property double temperature: sensorData.temperature
-    property double signals: sensorData.signal
-    property double battery: sensorData.battery
-    
+
+    // Link stats
+    property double radioRx: sensorData.signal
+    property double radioTx: sensorData.radioTxCount
+
     BaseHeader {
         id:header
-        headerText: "Barometric and Telemetry Data"
+        headerText: "State & Position Data"
     }
 
     Rectangle {
-        id: pressure_and_altitude
+        id: position_xy
 
         height: (parent.height-header.height)/3
         anchors {
@@ -31,55 +33,55 @@ BasePanel {
         }
 
         DataBoxList {
-            anchors.top: pressure_and_altitude.top
+            anchors.top: position_xy.top
             width: panel_Baro_And_Telemetry.width;
 
             size: 2
             boxHeight: 50
-            dataNames: ["PRESSURE (hPa)", "ALTITUDE (m)"]
-            dataValues: [pressure, altitude]
+            dataNames: ["POS X (m)", "POS Y (m)"]
+            dataValues: [posX, posY]
         }
     }
 
     Rectangle {
-        id: velocity_and_temp
+        id: altitude_and_velocity
 
         height: (parent.height-header.height)/3
         anchors {
-            top: pressure_and_altitude.bottom
+            top: position_xy.bottom
             left: parent.left
             leftMargin: header.anchors.leftMargin
         }
 
         DataBoxList {
-            anchors.top: velocity_and_temp.top
+            anchors.top: altitude_and_velocity.top
             width: panel_Baro_And_Telemetry.width;
 
             size: 2
             boxHeight: 50
-            dataNames: ["VELOCITY (km/h)", "TEMP (C)"]
-            dataValues: [velocity, temperature]
+            dataNames: ["ALTITUDE (m)", "VELOCITY (km/h)"]
+            dataValues: [altitude, velocity]
         }
     }
 
     Rectangle {
-        id: signal_and_battery
+        id: radio_stats
 
         height: (parent.height-header.height)/3
         anchors {
-            top: velocity_and_temp.bottom
+            top: altitude_and_velocity.bottom
             left: parent.left
             leftMargin: header.anchors.leftMargin
         }
 
         DataBoxList {
-            anchors.top: signal_and_battery.top
+            anchors.top: radio_stats.top
             width: panel_Baro_And_Telemetry.width;
 
             size: 2
             boxHeight: 50
-            dataNames: ["SIGNAL (%)", "BATTERY (%)"]
-            dataValues: [signals, battery]
+            dataNames: ["RADIO RX", "RADIO TX"]
+            dataValues: [radioRx, radioTx]
         }
     }
 }
