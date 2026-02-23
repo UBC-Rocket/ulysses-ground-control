@@ -1,4 +1,5 @@
 import QtQuick
+import "Items"
 
 Rectangle {
     //Initializing the Header
@@ -7,7 +8,7 @@ Rectangle {
     anchors.left: parent.left
     anchors.right: parent.right
     height: 70
-    color: "#111827"
+    color: Theme.background
 
     // Map FlightState enum integer to display string and color.
     // 0=IDLE, 1=ESTOP, 2=RISE, 3=HOVER, 4=LOWER
@@ -24,11 +25,11 @@ Rectangle {
 
     function flightStateColor(state) {
         switch (state) {
-            case 1: return "#b63b3b"   // ESTOP — red
-            case 2: return "#1e8e61"   // RISE  — green
-            case 3: return "#1e8e61"   // HOVER — green
-            case 4: return "#cda53a"   // LOWER — amber
-            default: return "#6b7280"  // IDLE / UNKNOWN — grey
+            case 1: return Theme.danger    // ESTOP — red
+            case 2: return Theme.success   // RISE  — green
+            case 3: return Theme.success   // HOVER — green
+            case 4: return Theme.warn      // LOWER — amber
+            default: return Theme.textTertiary  // IDLE / UNKNOWN — grey
         }
     }
 
@@ -42,9 +43,10 @@ Rectangle {
 
         //Text
         text: "Rocket Ground Control"
+        font.family: Theme.fontFamily
         font.pixelSize: 24
         font.bold: true
-        color: "#4a90e2"
+        color: Theme.accent
     }
 
     Text {
@@ -57,8 +59,9 @@ Rectangle {
 
         //Text
         text: "Ulysses"
+        font.family: Theme.fontFamily
         font.pixelSize: 18
-        color: "#8892b0"
+        color: Theme.textSecondary
     }
 
     // Flight state badge — top-right of header
@@ -69,16 +72,17 @@ Rectangle {
         anchors.rightMargin: 20
         width: flightStateText.implicitWidth + 24
         height: 32
-        radius: 6
+        radius: Theme.radiusPanel
         color: header.flightStateColor(sensorData.flightState)
 
         Text {
             id: flightStateText
             anchors.centerIn: parent
             text: header.flightStateLabel(sensorData.flightState)
-            font.pixelSize: 16
+            font.family: Theme.fontFamily
+            font.pixelSize: Theme.fontH2
             font.bold: true
-            color: "#ffffff"
+            color: Theme.textPrimary
         }
     }
 
@@ -86,8 +90,8 @@ Rectangle {
         id: line
 
         anchors.bottom: parent.bottom
-        color: "#16213e"
+        color: Theme.divider
         width: parent.width
-        height: 2
+        height: 1
     }
 }

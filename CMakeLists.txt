@@ -104,6 +104,10 @@ qt_add_executable(ulysses_ground_control
 # ----------------------------------------------------------------------
 # QML module
 # ----------------------------------------------------------------------
+set_source_files_properties("${QML_DIR}/Items/Theme.qml"
+    PROPERTIES QT_QML_SINGLETON_TYPE TRUE
+)
+
 qt_add_qml_module(ulysses_ground_control
     URI ulysses_ground_control
     VERSION 1.0
@@ -125,8 +129,10 @@ qt_add_qml_module(ulysses_ground_control
         "${QML_DIR}/Items/BasePanel.qml"
         "${QML_DIR}/Items/DataBox.qml"
         "${QML_DIR}/Items/DataBoxList.qml"
+        "${QML_DIR}/Items/Theme.qml"
     RESOURCES
         "${MESH_FILES}"
+        "${QML_DIR}/Items/qmldir"
 )
 
 # ----------------------------------------------------------------------

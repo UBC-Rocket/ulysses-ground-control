@@ -32,8 +32,9 @@ BasePanel {
             topMargin: 6
         }
         text: "Sensor Status"
+        font.family: Theme.fontFamily
         font.pixelSize: 15
-        color: "#D1D5DB"
+        color: Theme.textSecondary
     }
 
     Row {
@@ -59,15 +60,16 @@ BasePanel {
                 Rectangle {
                     width: parent.width
                     height: 28
-                    radius: 5
-                    color: panel_System_Health.sensorOk(modelData) ? "#1e8e61" : "#b63b3b"
+                    radius: Theme.radiusControl
+                    color: panel_System_Health.sensorOk(modelData) ? Theme.success : Theme.danger
 
                     Text {
                         anchors.centerIn: parent
                         text: panel_System_Health.sensorOk(modelData) ? "OK" : "FAIL"
+                        font.family: Theme.fontFamily
                         font.pixelSize: 13
                         font.bold: true
-                        color: "#ffffff"
+                        color: Theme.textPrimary
                     }
                 }
 
@@ -75,8 +77,9 @@ BasePanel {
                     width: parent.width
                     horizontalAlignment: Text.AlignHCenter
                     text: modelData
-                    font.pixelSize: 11
-                    color: "#9ca3af"
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontCaption
+                    color: Theme.textTertiary
                 }
             }
         }
@@ -93,8 +96,9 @@ BasePanel {
             topMargin: 14
         }
         text: "System Stats"
+        font.family: Theme.fontFamily
         font.pixelSize: 15
-        color: "#D1D5DB"
+        color: Theme.textSecondary
     }
 
     DataBoxList {
@@ -108,7 +112,7 @@ BasePanel {
         }
 
         size: 2
-        boxHeight: 50
+        boxHeight: 56
         dataNames: ["UPTIME (s)", "CMD RX"]
         dataValues: [
             sensorData.uptimeMs / 1000,

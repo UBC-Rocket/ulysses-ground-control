@@ -2,13 +2,14 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Controls.Basic as Basic   // skinnable controls
+import "Items"
 
 Rectangle {
     id: panel
-    color: "#1F2937"
-    border.color: "#2d3748"
-    border.width: 4
-    radius: 8
+    color: Theme.surface
+    border.color: Theme.border
+    border.width: Theme.strokePanel
+    radius: Theme.radiusPanel
     height: (parent.parent.height - 20)/2
     width:  (parent.parent.width  - 20)/2  - 5
 
@@ -24,8 +25,9 @@ Rectangle {
         Text {
             id: header_System_Alert
             text: "System Alert"
-            color: "#93C5FD"
-            font.pixelSize: 20
+            color: Theme.accent
+            font.family: Theme.fontFamily
+            font.pixelSize: Theme.fontH1
             font.bold: true
         }
 
@@ -37,19 +39,20 @@ Rectangle {
             text: "CLEAR"
             hoverEnabled: true
             padding: 8
-            font.pixelSize: 14
+            font.family: Theme.fontFamily
+            font.pixelSize: Theme.fontBody
             background: Rectangle {
-                radius: 8
-                color: clearBtn.down    ? "#20375f"
-                     : clearBtn.hovered ? "#1d3156"
-                     :                    "#1a2c4d"
-                border.width: 1
-                border.color: "#2a3f63"
+                radius: Theme.radiusControl
+                color: clearBtn.down    ? Theme.btnSecondaryPress
+                     : clearBtn.hovered ? Theme.btnSecondaryHover
+                     :                    Theme.btnSecondaryBg
+                border.width: Theme.strokeControl
+                border.color: Theme.btnSecondaryBorder
             }
             contentItem: Text {
                 anchors.centerIn: parent
                 text: clearBtn.text
-                color: "#a8c4ea"
+                color: Theme.btnSecondaryText
                 font: clearBtn.font
             }
             onClicked: alertModel.clear()
@@ -66,10 +69,10 @@ Rectangle {
             bottom: parent.bottom
             leftMargin: 10; rightMargin: 10; topMargin: 6; bottomMargin: 10
         }
-        radius: 12
-        color: "#0D131C"
-        border.width: 1
-        border.color: "#141C27"
+        radius: Theme.radiusCard
+        color: Theme.surfaceInset
+        border.width: Theme.strokeControl
+        border.color: Theme.border
 
         // --------- Model & View (only classified messages) ----------
         ListModel { id: alertModel }  // { ts: Date, level: "error|warning|success", text: string }
@@ -89,9 +92,9 @@ Rectangle {
                 contentItem: Rectangle {
                     implicitWidth: 6
                     radius: width/2
-                    color: parent.pressed ? "#536173"
-                         : parent.hovered ? "#455264"
-                         :                    "#394454"
+                    color: parent.pressed ? Theme.textSecondary
+                         : parent.hovered ? Theme.textTertiary
+                         :                  Theme.borderLight
                 }
                 background: Rectangle { color: "transparent" }
             }
@@ -103,24 +106,24 @@ Rectangle {
             delegate: Rectangle {
                 id: card
                 width: ListView.view.width
-                radius: 10
-                color: "#101824"
-                border.width: 1
-                border.color: "#1A2330"
+                radius: Theme.radiusCard
+                color: Theme.surfaceElevated
+                border.width: Theme.strokeControl
+                border.color: Theme.border
                 antialiasing: true
 
                 // ---- colors only; keep everything else exactly the same ----
-                property color stripe:   (level==="error")   ? "#b63b3b"   // left bar
-                                       : (level==="warning") ? "#cda53a"
-                                       :                        "#1e8e61"
-                property color chipBg:   (level==="error")   ? "#5a262a"   // pill background
-                                       : (level==="warning") ? "#4b3d17"
-                                       :                        "#123a2e"
-                property color chipText: (level==="error")   ? "#f5c8c8"   // pill text
-                                       : (level==="warning") ? "#ffe39a"
-                                       :                        "#bfeeda"
-                property color timeText: "#97a8bd"                         // timestamp
-                property color bodyText: "#d5dde8"                         // main text
+                property color stripe:   (level==="error")   ? Theme.danger
+                                       : (level==="warning") ? Theme.warn
+                                       :                        Theme.success
+                property color chipBg:   (level==="error")   ? Theme.dangerBg
+                                       : (level==="warning") ? Theme.warnBg
+                                       :                        Theme.successBg
+                property color chipText: (level==="error")   ? Theme.dangerText
+                                       : (level==="warning") ? Theme.warnText
+                                       :                        Theme.successText
+                property color timeText: Theme.textSecondary
+                property color bodyText: Theme.textPrimary
 
                 property int padX: 12
                 property int padY: 9
@@ -150,6 +153,7 @@ Rectangle {
                         Text {
                             text: Qt.formatTime(ts, "hh:mm:ss")
                             color: card.timeText
+                            font.family: Theme.monoFamily
                             font.pixelSize: 12
                             horizontalAlignment: Text.AlignLeft
                         }
@@ -170,13 +174,13 @@ Rectangle {
                                 anchors.centerIn: parent
                                 text: parent.label
                                 color: card.chipText
-                                font.pixelSize: 11
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontCaption
                                 font.bold: true
                                 padding: 9
                             }
 
                             width: Math.max(54, chipText.implicitWidth + 2 * chipText.padding)
-                            // no implicitWidth binding here
                         }
 
                     }
@@ -187,6 +191,7 @@ Rectangle {
                         Layout.fillWidth: true
                         text: model.text
                         color: card.bodyText
+                        font.family: Theme.fontFamily
                         font.pixelSize: 15
                         wrapMode: Text.Wrap
                     }

@@ -65,7 +65,7 @@ BasePanel {
 
                environment: SceneEnvironment{
                    backgroundMode: SceneEnvironment.Color
-                   clearColor: "#1F2937"
+                   clearColor: Theme.sceneBackground
                }
 
                DirectionalLight{}

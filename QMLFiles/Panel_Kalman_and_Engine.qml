@@ -51,8 +51,9 @@ BasePanel {
         Text {
             id: subheader_angles
             text: "Attitude (deg) / Angular Rate (°/s)"
+            font.family: Theme.fontFamily
             font.pixelSize: 18
-            color: "#D1D5DB"
+            color: Theme.textSecondary
             y: 0
         }
 
@@ -63,6 +64,7 @@ BasePanel {
             width: parent.width
 
             size: 2
+            boxHeight: 56
             dataNames: ["ANG RATE X (°/s)", "ROLL (°)"]
             dataValues: [raw_angle_x, filtered_angle_x]
         }
@@ -88,6 +90,7 @@ BasePanel {
             width: parent.width
 
             size: 2
+            boxHeight: 56
             dataNames: ["ANG RATE Y (°/s)", "PITCH (°)"]
             dataValues: [raw_angle_y, filtered_angle_y]
         }
@@ -113,6 +116,7 @@ BasePanel {
             width: parent.width
 
             size: 2
+            boxHeight: 56
             dataNames: ["ANG RATE Z (°/s)", "YAW (°)"]
             dataValues: [raw_angle_z, filtered_angle_z]
         }
@@ -139,8 +143,9 @@ BasePanel {
         Text {
             id: subheader_engine
             text: "Engine Control"
+            font.family: Theme.fontFamily
             font.pixelSize: 18
-            color: "#D1D5DB"
+            color: Theme.textSecondary
             y: 0
         }
 
@@ -151,7 +156,7 @@ BasePanel {
             width: parent.width
 
             size: 3
-            boxHeight: 50
+            boxHeight: 56
             dataNames: ["THRUST", "GIMBAL X", "GIMBAL Y"]
             dataValues: [thrustCmd, gimbalX, gimbalY]
         }

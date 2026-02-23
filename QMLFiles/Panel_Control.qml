@@ -1,16 +1,17 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import "Items"
 
 Rectangle {
     id: control_panel
     property int txWhich: 1
     signal commandTriggered(int which, string code) // Public signal: emitted when a command card is clicked; parent can handle it.
 
-    color: "#1F2937"
-    border.color: "#2d3748"
-    border.width: 4
-    radius: 8
+    color: Theme.surface
+    border.color: Theme.border
+    border.width: Theme.strokePanel
+    radius: Theme.radiusPanel
     height: (parent.parent.height - 20)/2 - 10 // Sized to occupy half-height of parent area with margins.
     width: (parent.parent.width - 20)/4 - 5    // Sized to occupy quarter-width of parent area with margins.
 
@@ -26,9 +27,10 @@ Rectangle {
 
         Text {
             id: header_Command
-            color: "#93C5FD"
+            color: Theme.accent
             text: "Command Controls" // Section label shown at the top of the panel.
-            font.pixelSize: 20
+            font.family: Theme.fontFamily
+            font.pixelSize: Theme.fontH1
             font.bold: true
         }
     }
@@ -50,16 +52,16 @@ Rectangle {
             id: cmdCard
             Rectangle {
                 anchors.fill: parent
-                radius: 18
-                border.width: 2
-                border.color: "#5FA8FF"        // Visual affordance to indicate clickability.
-                color: hovered ? "#162133" : "#111827" // Hover feedback without relayout.
+                radius: Theme.radiusCard
+                border.width: Theme.strokeControl
+                border.color: Theme.accentMuted        // Visual affordance to indicate clickability.
+                color: hovered ? Theme.accentSubtle : Theme.surfaceInset // Hover feedback without relayout.
 
                 property string title: ""       // User-facing name of the command (e.g., "Hover").
                 property string cmd: ""         // Actual single-letter code to emit (e.g., "H").
 
                 readonly property bool hovered: ma.containsMouse // Centralized hover state for styling.
-                Behavior on color { ColorAnimation { duration: 120 } } // Smooth hover color transition.
+                Behavior on color { ColorAnimation { duration: Theme.transitionFast } } // Smooth hover color transition.
                 Behavior on scale { NumberAnimation { duration: 90 } } // Brief press/release animation.
 
                 // --- Text stack: shows the command name and a short hint with the code to be sent ---
@@ -71,7 +73,8 @@ Rectangle {
 
                     Text {
                         text: title
-                        color: "#DCE7F5"
+                        color: Theme.textPrimary
+                        font.family: Theme.fontFamily
                         font.pixelSize: 18
                         font.bold: true
                         horizontalAlignment: Text.AlignHCenter
@@ -80,7 +83,8 @@ Rectangle {
                     }
                     Text {
                         text: 'sends "' + cmd + '"' // Secondary hint: shows the code that will be sent.
-                        color: "#9AA7B7"
+                        color: Theme.textSecondary
+                        font.family: Theme.fontFamily
                         font.pixelSize: 12
                         horizontalAlignment: Text.AlignHCenter
                         wrapMode: Text.WordWrap
@@ -94,11 +98,11 @@ Rectangle {
                     radius: parent.radius
                     color: "transparent"
                     border.width: 1
-                    border.color: "#7BB6FF"
-                    opacity: 0.35
+                    border.color: Theme.accentMuted
+                    opacity: 0.20
                 }
 
-                // --- Mouse handler: emits the panel’s signal with this card’s code when clicked ---
+                // --- Mouse handler: emits the panel's signal with this card's code when clicked ---
                 MouseArea {
                     id: ma
                     anchors.fill: parent

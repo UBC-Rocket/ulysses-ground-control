@@ -14,32 +14,36 @@ Rectangle {
         return numericValue.toFixed(2)
     }
 
-    height: 50
+    height: 56
     width: (parent.width-18*sections)/sections
     x: (section_num-1) * (width+10)
-    radius: 5
-    border.color: "#2d3748"
-    border.width: 2
-    color: "#374151"
+    radius: Theme.radiusCard
+    border.color: Theme.border
+    border.width: Theme.strokeControl
+    color: Theme.surfaceElevated
 
     Text {
         id: name
 
         text: dataName
-        font.pixelSize: 14
-        color: "#729AAF"
+        font.family: Theme.fontFamily
+        font.pixelSize: Theme.fontMetricLabel
+        color: Theme.textTertiary
 
-        anchors.centerIn: parent
-        anchors.verticalCenterOffset: -10
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: 6
     }
 
     Text {
         id: value
 
         anchors.top: name.bottom
+        anchors.topMargin: 2
         text: formatDataValue(dataValue)
-        font.pixelSize: 14
-        color: "#729AAF"
+        font.family: Theme.monoFamily
+        font.pixelSize: Theme.fontMetricValue
+        color: Theme.textPrimary
 
         anchors.horizontalCenter: parent.horizontalCenter;
     }

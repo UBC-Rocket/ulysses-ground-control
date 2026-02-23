@@ -3,7 +3,6 @@
 #include <QQmlContext>
 #include <QCommandLineParser>
 #include <QTimer>
-
 #include "SerialBridge.h"
 #include "SensorDataModel.h"
 #include "CommandSender.h"
