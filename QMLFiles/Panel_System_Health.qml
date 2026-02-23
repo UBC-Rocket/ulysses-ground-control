@@ -37,15 +37,16 @@ BasePanel {
         }
         spacing: 8
 
-        // Helper component inlined as a repeated pattern for each sensor
+        // Rebuild the Repeater model each time a SystemStatus packet arrives
+        // so that sensor badges react to actual telemetry values.
         Repeater {
             id: sensorRepeater
             model: [
-                { name: "ACCEL",  ok: true || downlinkDecoder.accelOk      },
-                { name: "GYRO",   ok: true || downlinkDecoder.gyroOk        },
-                { name: "BARO 1", ok: true || downlinkDecoder.baro1Ok       },
-                { name: "BARO 2", ok: true || downlinkDecoder.baro2Ok       },
-                { name: "GPS",    ok: true || downlinkDecoder.gpsConnected   }
+                { name: "ACCEL",  ok: sensorData.accelOk },
+                { name: "GYRO",   ok: sensorData.gyroOk },
+                { name: "BARO 1", ok: sensorData.baro1Ok },
+                { name: "BARO 2", ok: sensorData.baro2Ok },
+                { name: "GPS",    ok: sensorData.gpsConnected }
             ]
 
             delegate: Column {
@@ -78,6 +79,19 @@ BasePanel {
         }
     }
 
+    Connections {
+        target: sensorData
+        function onStatusReceived() {
+            sensorRepeater.model = [
+                { name: "ACCEL",  ok: sensorData.accelOk },
+                { name: "GYRO",   ok: sensorData.gyroOk },
+                { name: "BARO 1", ok: sensorData.baro1Ok },
+                { name: "BARO 2", ok: sensorData.baro2Ok },
+                { name: "GPS",    ok: sensorData.gpsConnected }
+            ]
+        }
+    }
+
     // ── Section 2: System stats ─────────────────────────────────────────────
 
     Text {
@@ -107,8 +121,8 @@ BasePanel {
         boxHeight: 50
         dataNames: ["UPTIME (s)", "CMD RX"]
         dataValues: [
-            downlinkDecoder.uptimeMs / 1000,
-            downlinkDecoder.cmdRxCount
+            sensorData.uptimeMs / 1000,
+            sensorData.cmdRxCount
         ]
     }
 }

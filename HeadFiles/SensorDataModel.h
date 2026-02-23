@@ -9,12 +9,12 @@ class SerialBridge;
 /**
  * @brief SensorDataModel
  * Holds the latest parsed sensor values and exposes them to QML via properties.
+ * Decodes both TelemetryState (10Hz) and SystemStatus (1Hz) from protobuf downlink.
  */
 class SensorDataModel : public QObject {
     Q_OBJECT
 
 public:
-    /// Construct a SensorDataModel that listens to lines from the given SerialBridge.
     explicit SensorDataModel(SerialBridge* bridge, QObject* parent = nullptr);
 
     // Barometer / position
@@ -42,6 +42,17 @@ public:
     Q_PROPERTY(double signal       READ signal       NOTIFY telemetryDataChanged)
     Q_PROPERTY(double radioTxCount READ radioTxCount NOTIFY telemetryDataChanged)
 
+    // SystemStatus properties
+    Q_PROPERTY(int    flightState   READ flightState   NOTIFY statusReceived)
+    Q_PROPERTY(quint32 uptimeMs     READ uptimeMs      NOTIFY statusReceived)
+    Q_PROPERTY(bool   accelOk       READ accelOk       NOTIFY statusReceived)
+    Q_PROPERTY(bool   gyroOk        READ gyroOk        NOTIFY statusReceived)
+    Q_PROPERTY(bool   baro1Ok       READ baro1Ok       NOTIFY statusReceived)
+    Q_PROPERTY(bool   baro2Ok       READ baro2Ok       NOTIFY statusReceived)
+    Q_PROPERTY(bool   gpsConnected  READ gpsConnected  NOTIFY statusReceived)
+    Q_PROPERTY(quint32 radioRxCount READ radioRxCount  NOTIFY statusReceived)
+    Q_PROPERTY(quint32 cmdRxCount   READ cmdRxCount    NOTIFY statusReceived)
+
     // Simple getters used by QML properties
     double pressure() const { return m_pressure; }
     double altitude() const { return m_altitude; }
@@ -64,10 +75,17 @@ public:
     double signal()       const { return m_signal; }
     double radioTxCount() const { return m_radioTxCount; }
 
-public slots:
-    /// Entry point for raw text lines; usually connected to SerialBridge::textReceivedFrom().
-    void onLineReceived(const QString& line);
+    int     flightState()  const { return m_flightState; }
+    quint32 uptimeMs()     const { return m_uptimeMs; }
+    bool    accelOk()      const { return m_accelOk; }
+    bool    gyroOk()       const { return m_gyroOk; }
+    bool    baro1Ok()      const { return m_baro1Ok; }
+    bool    baro2Ok()      const { return m_baro2Ok; }
+    bool    gpsConnected() const { return m_gpsConnected; }
+    quint32 radioRxCount() const { return m_radioRxCount; }
+    quint32 cmdRxCount()   const { return m_cmdRxCount; }
 
+public slots:
     /// Entry point for binary COBS packets; decode Downlink and update model.
     void onBinaryPacketReceived(int which, const QByteArray& packet);
 
@@ -92,6 +110,7 @@ signals:
     void baroDataChanged();
     void engineDataChanged();
     void telemetryDataChanged();
+    void statusReceived();
 
 private:
     // Backing storage for the latest sensor values
@@ -116,13 +135,21 @@ private:
     double m_signal       = 0.0;
     double m_radioTxCount = 0.0;
 
-    /// Parse a CSV line into individual sensor values and update stored properties.
-    void parseIncomingData(const QString& line);
+    // SystemStatus state
+    int     m_flightState  = 0;
+    quint32 m_uptimeMs     = 0;
+    bool    m_accelOk      = false;
+    bool    m_gyroOk       = false;
+    bool    m_baro1Ok      = false;
+    bool    m_baro2Ok      = false;
+    bool    m_gpsConnected = false;
+    quint32 m_radioRxCount = 0;
+    quint32 m_cmdRxCount   = 0;
 
     /// Update model from decoded Downlink (TelemetryState or SystemStatus).
     void applyDownlink(int which, const void* downlinkStruct);
 
-    SerialBridge* m_bridge = nullptr;  ///< Non-owning pointer to the serial bridge used as data source.
+    SerialBridge* m_bridge = nullptr;
 };
 
 #endif // SENSORDATAMODEL_H

@@ -75,7 +75,6 @@ set(SRC_FILES
     "${SRC_DIR}/main.cpp"
     "${SRC_DIR}/SerialBridge.cpp"
     "${SRC_DIR}/CommandSender.cpp"
-    "${SRC_DIR}/DownlinkDecoder.cpp"
     "${SRC_DIR}/AlarmReceiver.cpp"
     "${SRC_DIR}/SensorDataModel.cpp"
     ${PROTOBUF_SRC}
@@ -86,7 +85,6 @@ set(SRC_FILES
 set(HDR_FILES
     "${HEAD_DIR}/SerialBridge.h"
     "${HEAD_DIR}/CommandSender.h"
-    "${HEAD_DIR}/DownlinkDecoder.h"
     "${HEAD_DIR}/AlarmReceiver.h"
     "${HEAD_DIR}/SensorDataModel.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/generated/tvr/command.pb.h"
@@ -121,12 +119,10 @@ qt_add_qml_module(ulysses_ground_control
         "${QML_DIR}/FullDroneAssembly.qml"
         "${QML_DIR}/Panel_System_Alert.qml"
         "${QML_DIR}/Panel_System_Health.qml"
-        "${QML_DIR}/Panel_Test.qml"
         "${QML_DIR}/RadioTestWindow.qml"
         "${QML_DIR}/Shortcuts.qml"
         "${QML_DIR}/Items/BaseHeader.qml"
         "${QML_DIR}/Items/BasePanel.qml"
-        "${QML_DIR}/Items/Data.qml"
         "${QML_DIR}/Items/DataBox.qml"
         "${QML_DIR}/Items/DataBoxList.qml"
     RESOURCES

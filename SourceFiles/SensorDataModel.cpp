@@ -8,9 +8,9 @@ extern "C" {
 #include <QtMath>
 #include <cmath>
 
-static constexpr bool kSerialDebug = false;
-
 namespace {
+static constexpr bool kDownlinkDebug = false;
+
 // Quaternion (w,x,y,z) to Euler angles (roll, pitch, yaw) in radians.
 void quatToEulerRad(float w, float x, float y, float z,
                     float* roll_rad, float* pitch_rad, float* yaw_rad) {
@@ -34,12 +34,12 @@ float radToDeg(float rad) {
 } // namespace
 
 SensorDataModel::SensorDataModel(SerialBridge* bridge, QObject* parent)
-    : m_bridge(bridge), QObject(parent)
+    : QObject(parent), m_bridge(bridge)
 {
     if (!m_bridge)
-        return; // No source of lines if bridge is null.
+        return;
 
-    // Subscribe to binary COBS packets (primary: rocket sends COBS+protobuf Downlink).
+    // Subscribe to binary COBS packets (rocket sends COBS+protobuf Downlink).
     QObject::connect(
         m_bridge,
         &SerialBridge::binaryPacketReceived,
@@ -52,25 +52,6 @@ SensorDataModel::SensorDataModel(SerialBridge* bridge, QObject* parent)
             if (listen)
                 onBinaryPacketReceived(which, packet);
         });
-
-    // Also subscribe to text lines (e.g. legacy CSV or debug output).
-    QObject::connect(
-        m_bridge,
-        &SerialBridge::textReceivedFrom,
-        this,
-        [this](int which, const QString &line) {
-            if (!m_bridge) return;
-            const bool p1 = m_bridge->isConnected(1);
-            const bool p2 = m_bridge->isConnected(2);
-            bool listen = (p1 && p2) ? (which == 1) : m_bridge->isConnected(which);
-            if (listen)
-                onLineReceived(line);
-        });
-}
-
-void SensorDataModel::onLineReceived(const QString& line)
-{
-    parseIncomingData(line);
 }
 
 void SensorDataModel::onBinaryPacketReceived(int which, const QByteArray& packet)
@@ -86,62 +67,15 @@ void SensorDataModel::onBinaryPacketReceived(int which, const QByteArray& packet
         rp_packet_decode(data, size, &tvr_Downlink_msg, &downlink);
 
     if (result.status != RP_CODEC_OK)
-        return; // Bad checksum or malformed packet; skip silently or log occasionally.
+        return;
 
     applyDownlink(which, &downlink);
-}
-
-void SensorDataModel::parseIncomingData(const QString& line)
-{
-    // Ignore completely empty / whitespace-only lines.
-    if (line.trimmed().isEmpty())
-        return;
-
-    // Incoming CSV, comma-separated values.
-    QStringList parts = line.split(',', Qt::SkipEmptyParts);
-
-    // Expected format (12 fields):
-    // pressure,altitude,raw_angle_x,filtered_angle_x,raw_angle_y,filtered_angle_y,raw_angle_z,filtered_angle_z,velocity,temperature,signal,battery
-    if (parts.size() != 12) {
-        // Throttle warnings so high-rate streams don't flood the log.
-        static int errorCount = 0;
-        if (++errorCount % 50 == 0) {
-            qWarning() << "Expected 12 CSV fields, got"
-                       << parts.size() << "in line:" << line;
-        }
-        return;
-    }
-
-    double pressure        = parts[0].toDouble();
-    double altitude        = parts[1].toDouble();
-    double rawAngleX       = parts[2].toDouble();
-    double filteredAngleX  = parts[3].toDouble();
-    double rawAngleY       = parts[4].toDouble();
-    double filteredAngleY  = parts[5].toDouble();
-    double rawAngleZ       = parts[6].toDouble();
-    double filteredAngleZ  = parts[7].toDouble();
-    double velocity        = parts[8].toDouble();
-    double temperature     = parts[9].toDouble();
-    double signal          = parts[10].toDouble();
-    double radioTxCount    = parts[11].toDouble();
-
-    if (kSerialDebug) {
-        qDebug() << "| Baro:" << pressure << altitude
-                 << "| Kalman:" << rawAngleX << filteredAngleX << rawAngleY << filteredAngleY << rawAngleZ << filteredAngleZ
-                 << "| Telemetry:" << velocity << temperature << signal << radioTxCount;
-    }
-
-    // Update grouped values and notify QML bindings.
-    updateKalman(rawAngleX, filteredAngleX, rawAngleY, filteredAngleY, rawAngleZ, filteredAngleZ);
-    updateBaro(pressure, altitude);
-    updateTelemetry(velocity, temperature, signal, radioTxCount);
 }
 
 void SensorDataModel::updateKalman(double rawAngleX, double filteredAngleX,
                                    double rawAngleY, double filteredAngleY,
                                    double rawAngleZ, double filteredAngleZ)
 {
-    // Cache latest angles and notify QML bindings.
     m_rawAngleX = rawAngleX;
     m_filteredAngleX = filteredAngleX;
     m_rawAngleY = rawAngleY;
@@ -154,7 +88,6 @@ void SensorDataModel::updateKalman(double rawAngleX, double filteredAngleX,
 
 void SensorDataModel::updateBaro(double pressure, double altitude, double posX, double posY)
 {
-    // Cache latest barometric/position readings and notify QML bindings.
     m_pressure = pressure;
     m_altitude = altitude;
     m_posX     = posX;
@@ -175,7 +108,6 @@ void SensorDataModel::updateEngine(double thrustCmd, double gimbalX, double gimb
 void SensorDataModel::updateTelemetry(double velocity, double temperature,
                                       double signal, double radioTxCount)
 {
-    // Cache latest telemetry and notify QML bindings.
     m_velocity     = velocity;
     m_temperature  = temperature;
     m_signal       = signal;
@@ -186,10 +118,18 @@ void SensorDataModel::updateTelemetry(double velocity, double temperature,
 
 void SensorDataModel::applyDownlink(int which, const void* downlinkStruct)
 {
+    Q_UNUSED(which);
     const tvr_Downlink* d = static_cast<const tvr_Downlink*>(downlinkStruct);
 
     if (d->which_payload == tvr_Downlink_telemetry_tag) {
         const tvr_TelemetryState* t = &d->payload.telemetry;
+
+        if (kDownlinkDebug) {
+            qDebug() << "TelemetryState: has_pos=" << t->has_position
+                     << "has_vel=" << t->has_velocity
+                     << "has_att=" << t->has_attitude
+                     << "flight_state=" << t->flight_state;
+        }
 
         // Velocity magnitude [m/s] → km/h
         double vel = 0.0;
@@ -226,20 +166,47 @@ void SensorDataModel::applyDownlink(int which, const void* downlinkStruct)
             py  = static_cast<double>(t->position.y);
         }
 
+        // Flight state from TelemetryState (10Hz update).
+        m_flightState = static_cast<int>(t->flight_state);
+
         updateKalman(rawX, filtX, rawY, filtY, rawZ, filtZ);
         updateBaro(0.0, alt, px, py);
-        updateTelemetry(vel, 0.0, m_signal, m_radioTxCount); // keep last link stats
+        updateTelemetry(vel, 0.0, m_signal, m_radioTxCount);
         updateEngine(
             static_cast<double>(t->thrust_cmd),
             static_cast<double>(t->gimbal_x),
             static_cast<double>(t->gimbal_y)
         );
 
+        // Emit statusReceived so flightState binding updates from telemetry too.
+        emit statusReceived();
+
     } else if (d->which_payload == tvr_Downlink_status_tag) {
         const tvr_SystemStatus* s = &d->payload.status;
+
+        if (kDownlinkDebug) {
+            qDebug() << "SystemStatus: flight_state=" << s->flight_state
+                     << "accel=" << s->accel_ok << "gyro=" << s->gyro_ok
+                     << "baro1=" << s->baro1_ok << "baro2=" << s->baro2_ok
+                     << "gps=" << s->gps_connected
+                     << "uptime=" << s->uptime_ms;
+        }
+
+        m_flightState  = static_cast<int>(s->flight_state);
+        m_uptimeMs     = s->uptime_ms;
+        m_accelOk      = s->accel_ok;
+        m_gyroOk       = s->gyro_ok;
+        m_baro1Ok      = s->baro1_ok;
+        m_baro2Ok      = s->baro2_ok;
+        m_gpsConnected = s->gps_connected;
+        m_radioRxCount = s->radio_rx_count;
+        m_cmdRxCount   = s->cmd_rx_count;
+
         // Update link stats from SystemStatus; leave other telemetry unchanged.
         updateTelemetry(m_velocity, m_temperature,
                         static_cast<double>(s->radio_rx_count),
                         static_cast<double>(s->radio_tx_count));
+
+        emit statusReceived();
     }
 }

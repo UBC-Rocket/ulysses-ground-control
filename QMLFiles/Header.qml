@@ -70,12 +70,12 @@ Rectangle {
         width: flightStateText.implicitWidth + 24
         height: 32
         radius: 6
-        color: header.flightStateColor(downlinkDecoder.flightState)
+        color: header.flightStateColor(sensorData.flightState)
 
         Text {
             id: flightStateText
             anchors.centerIn: parent
-            text: header.flightStateLabel(downlinkDecoder.flightState)
+            text: header.flightStateLabel(sensorData.flightState)
             font.pixelSize: 16
             font.bold: true
             color: "#ffffff"
