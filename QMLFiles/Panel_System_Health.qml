@@ -5,6 +5,17 @@ import "Items"
 BasePanel {
     id: panel_System_Health
 
+    function sensorOk(name) {
+        switch (name) {
+        case "ACCEL": return sensorData.accelOk
+        case "GYRO": return sensorData.gyroOk
+        case "BARO 1": return sensorData.baro1Ok
+        case "BARO 2": return sensorData.baro2Ok
+        case "GPS": return sensorData.gpsConnected
+        default: return false
+        }
+    }
+
     BaseHeader {
         id: header
         headerText: "System Health"
@@ -37,17 +48,9 @@ BasePanel {
         }
         spacing: 8
 
-        // Rebuild the Repeater model each time a SystemStatus packet arrives
-        // so that sensor badges react to actual telemetry values.
         Repeater {
             id: sensorRepeater
-            model: [
-                { name: "ACCEL",  ok: sensorData.accelOk },
-                { name: "GYRO",   ok: sensorData.gyroOk },
-                { name: "BARO 1", ok: sensorData.baro1Ok },
-                { name: "BARO 2", ok: sensorData.baro2Ok },
-                { name: "GPS",    ok: sensorData.gpsConnected }
-            ]
+            model: ["ACCEL", "GYRO", "BARO 1", "BARO 2", "GPS"]
 
             delegate: Column {
                 spacing: 4
@@ -57,11 +60,11 @@ BasePanel {
                     width: parent.width
                     height: 28
                     radius: 5
-                    color: modelData.ok ? "#1e8e61" : "#b63b3b"
+                    color: panel_System_Health.sensorOk(modelData) ? "#1e8e61" : "#b63b3b"
 
                     Text {
                         anchors.centerIn: parent
-                        text: modelData.ok ? "OK" : "FAIL"
+                        text: panel_System_Health.sensorOk(modelData) ? "OK" : "FAIL"
                         font.pixelSize: 13
                         font.bold: true
                         color: "#ffffff"
@@ -71,24 +74,11 @@ BasePanel {
                 Text {
                     width: parent.width
                     horizontalAlignment: Text.AlignHCenter
-                    text: modelData.name
+                    text: modelData
                     font.pixelSize: 11
                     color: "#9ca3af"
                 }
             }
-        }
-    }
-
-    Connections {
-        target: sensorData
-        function onStatusReceived() {
-            sensorRepeater.model = [
-                { name: "ACCEL",  ok: sensorData.accelOk },
-                { name: "GYRO",   ok: sensorData.gyroOk },
-                { name: "BARO 1", ok: sensorData.baro1Ok },
-                { name: "BARO 2", ok: sensorData.baro2Ok },
-                { name: "GPS",    ok: sensorData.gpsConnected }
-            ]
         }
     }
 

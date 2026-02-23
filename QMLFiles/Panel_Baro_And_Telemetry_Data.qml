@@ -13,7 +13,7 @@ BasePanel {
     property double velocity: sensorData.velocity
 
     // Link stats
-    property double radioRx: sensorData.signal
+    property double radioRx: sensorData.radioRxCount
     property double radioTx: sensorData.radioTxCount
 
     BaseHeader {

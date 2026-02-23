@@ -86,9 +86,8 @@ void SensorDataModel::updateKalman(double rawAngleX, double filteredAngleX,
     emit kalmanDataChanged();
 }
 
-void SensorDataModel::updateBaro(double pressure, double altitude, double posX, double posY)
+void SensorDataModel::updatePosition(double altitude, double posX, double posY)
 {
-    m_pressure = pressure;
     m_altitude = altitude;
     m_posX     = posX;
     m_posY     = posY;
@@ -105,13 +104,9 @@ void SensorDataModel::updateEngine(double thrustCmd, double gimbalX, double gimb
     emit engineDataChanged();
 }
 
-void SensorDataModel::updateTelemetry(double velocity, double temperature,
-                                      double signal, double radioTxCount)
+void SensorDataModel::updateTelemetry(double velocity)
 {
-    m_velocity     = velocity;
-    m_temperature  = temperature;
-    m_signal       = signal;
-    m_radioTxCount = radioTxCount;
+    m_velocity = velocity;
 
     emit telemetryDataChanged();
 }
@@ -132,7 +127,7 @@ void SensorDataModel::applyDownlink(int which, const void* downlinkStruct)
         }
 
         // Velocity magnitude [m/s] → km/h
-        double vel = 0.0;
+        double vel = m_velocity;
         if (t->has_velocity) {
             const tvr_Vec3* v = &t->velocity;
             double vx = static_cast<double>(v->x), vy = static_cast<double>(v->y), vz = static_cast<double>(v->z);
@@ -159,7 +154,7 @@ void SensorDataModel::applyDownlink(int which, const void* downlinkStruct)
         }
 
         // Position [m]: altitude from z, horizontal from x/y.
-        double alt = 0.0, px = 0.0, py = 0.0;
+        double alt = m_altitude, px = m_posX, py = m_posY;
         if (t->has_position) {
             alt = static_cast<double>(t->position.z);
             px  = static_cast<double>(t->position.x);
@@ -170,8 +165,8 @@ void SensorDataModel::applyDownlink(int which, const void* downlinkStruct)
         m_flightState = static_cast<int>(t->flight_state);
 
         updateKalman(rawX, filtX, rawY, filtY, rawZ, filtZ);
-        updateBaro(0.0, alt, px, py);
-        updateTelemetry(vel, 0.0, m_signal, m_radioTxCount);
+        updatePosition(alt, px, py);
+        updateTelemetry(vel);
         updateEngine(
             static_cast<double>(t->thrust_cmd),
             static_cast<double>(t->gimbal_x),
@@ -200,12 +195,8 @@ void SensorDataModel::applyDownlink(int which, const void* downlinkStruct)
         m_baro2Ok      = s->baro2_ok;
         m_gpsConnected = s->gps_connected;
         m_radioRxCount = s->radio_rx_count;
+        m_radioTxCount = s->radio_tx_count;
         m_cmdRxCount   = s->cmd_rx_count;
-
-        // Update link stats from SystemStatus; leave other telemetry unchanged.
-        updateTelemetry(m_velocity, m_temperature,
-                        static_cast<double>(s->radio_rx_count),
-                        static_cast<double>(s->radio_tx_count));
 
         emit statusReceived();
     }
