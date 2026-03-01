@@ -6,10 +6,10 @@ Rectangle {
     id: base
 
     //Visualization
-    color: "#1F2937"
-    border.color: "#2d3748"
-    border.width: 4
-    radius: 8
+    color: Theme.surface
+    border.color: Theme.border
+    border.width: Theme.strokePanel
+    radius: Theme.radiusPanel
 
     //Sizing
     height: (parent.parent.height - 20)/2 - 10

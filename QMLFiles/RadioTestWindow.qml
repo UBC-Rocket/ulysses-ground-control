@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Window 2.15
+import "Items"
 
 // Main window for RFD900x single/dual port terminal
 ApplicationWindow {
@@ -9,6 +10,24 @@ ApplicationWindow {
     width: 1100
     height: 700
     visible: false
+
+    font.family: Theme.fontFamily
+
+    palette {
+        window:          Theme.background
+        base:            Theme.surfaceInset
+        alternateBase:   Theme.surfaceElevated
+        text:            Theme.textPrimary
+        windowText:      Theme.textPrimary
+        button:          Theme.btnSecondaryBg
+        buttonText:      Theme.btnSecondaryText
+        highlight:       Theme.accent
+        highlightedText: Theme.background
+        placeholderText: Theme.textTertiary
+        mid:             Theme.border
+        dark:            Theme.border
+        light:           Theme.borderLight
+    }
 
     // ---------- Modes / State ----------
 
@@ -118,7 +137,7 @@ ApplicationWindow {
                 if (rxWhich === 2)
                     singleConnected = connected
             }
-        }       
+        }
 
         // Keep title in sync with backend TX/RX mapping
         function onTxToChanged() { radioWin.title = radioWin.titleText() }
@@ -294,7 +313,7 @@ ApplicationWindow {
                             // Connection status indicator
                             Label {
                               text: singleConnected ? "Connected" : "—"
-                              color: singleConnected ? "green" : "gray"
+                              color: singleConnected ? Theme.success : Theme.textTertiary
                             }
 
                         }
@@ -363,7 +382,8 @@ ApplicationWindow {
                                         readOnly: true
                                         wrapMode: TextEdit.Wrap
                                         width: flickSingle.width
-                                        font.family: "Consolas"
+                                        font.family: Theme.monoFamily
+                                        color: Theme.textPrimary
                                         text: (rxWhich === 1 ? rxLogP1 : rxLogP2)
 
                                         // Auto-scroll to bottom on new text
@@ -481,7 +501,7 @@ ApplicationWindow {
                             // Connection indicator for P1
                             Label {
                                 text: p1Connected ? "Connected" : "—"
-                                color: p1Connected ? "green" : "gray"
+                                color: p1Connected ? Theme.success : Theme.textTertiary
                                 Layout.alignment: Qt.AlignVCenter
                             }
                         }
@@ -590,7 +610,8 @@ ApplicationWindow {
                                         readOnly: true
                                         wrapMode: TextEdit.Wrap
                                         width: flickP1.width
-                                        font.family: "Consolas"
+                                        font.family: Theme.monoFamily
+                                        color: Theme.textPrimary
                                         text: rxLogP1
 
                                         // Auto-scroll to bottom on new RX text
@@ -685,7 +706,7 @@ ApplicationWindow {
                             // Connection indicator for P2
                             Label {
                                 text: p2Connected ? "Connected" : "—"
-                                color: p2Connected ? "green" : "gray"
+                                color: p2Connected ? Theme.success : Theme.textTertiary
                                 Layout.alignment: Qt.AlignVCenter
                             }
                         }
@@ -794,7 +815,8 @@ ApplicationWindow {
                                         readOnly: true
                                         wrapMode: TextEdit.Wrap
                                         width: flickP2.width
-                                        font.family: "Consolas"
+                                        font.family: Theme.monoFamily
+                                        color: Theme.textPrimary
                                         text: rxLogP2
 
                                         // Auto-scroll to bottom on new text

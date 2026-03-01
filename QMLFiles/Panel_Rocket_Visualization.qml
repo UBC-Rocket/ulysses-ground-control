@@ -34,7 +34,7 @@ BasePanel {
            property real angle_y: sensorData.filteredAngleY
            property real angle_z: sensorData.filteredAngleZ
            property real length: 200        // shaft length
-           property real thickness: 0.4       // shaft thickness
+           property real thickness: 0.15       // shaft thickness
 
         // //FAKE DATA
         //    Timer {
@@ -65,7 +65,7 @@ BasePanel {
 
                environment: SceneEnvironment{
                    backgroundMode: SceneEnvironment.Color
-                   clearColor: "#1F2937"
+                   clearColor: Theme.sceneBackground
                }
 
                DirectionalLight{}
@@ -119,7 +119,7 @@ BasePanel {
                                       //Helper lines to visualize tilt
                                       Model{
                                           source: "#Cylinder"
-                                          scale: Qt.vector3d(0.1, visualization.length, visualization.thickness)
+                                          scale: Qt.vector3d(0.03, visualization.length, visualization.thickness)
                                           materials: DefaultMaterial{
                                               diffuseColor: "green"
                                               lighting: PrincipledMaterial.NoLighting
@@ -130,7 +130,7 @@ BasePanel {
                                       Model{
                                           source: "#Cylinder"
                                           eulerRotation: Qt.vector3d(0,0,90)
-                                          scale: Qt.vector3d(0.1, visualization.length, visualization.thickness)
+                                          scale: Qt.vector3d(0.03, visualization.length, visualization.thickness)
                                           materials: DefaultMaterial{
                                               diffuseColor: "red"
                                               lighting: PrincipledMaterial.NoLighting
@@ -141,7 +141,7 @@ BasePanel {
                                       Model{
                                           source: "#Cylinder"
                                           eulerRotation: Qt.vector3d(90,0,0)
-                                          scale: Qt.vector3d(0.1, visualization.length, visualization.thickness)
+                                          scale: Qt.vector3d(0.03, visualization.length, visualization.thickness)
                                           materials: DefaultMaterial{
                                               diffuseColor: "blue"
                                               lighting: PrincipledMaterial.NoLighting

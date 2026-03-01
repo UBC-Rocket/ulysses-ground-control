@@ -25,7 +25,7 @@ BasePanel {
         if (name === "Hover") return "#60A5FA"
         if (name === "Up")    return "#34D399"
         if (name === "Down")  return "#FBBF24"
-        return "#93C5FD"
+        return Theme.accent
     }
 
     function formatGain(value) {
@@ -81,20 +81,21 @@ BasePanel {
         anchors.right: parent.right
         anchors.margins: 12
         padding: 10
-        font.pixelSize: 14
+        font.family: Theme.fontFamily
+        font.pixelSize: Theme.fontBody
         hoverEnabled: true
         background: Rectangle {
-            radius: 10
-            color: editButton.down    ? "#1f3a6d"
-                 : editButton.hovered ? "#1b335f"
-                 :                      "#152844"
-            border.width: 1
-            border.color: "#2c4a7a"
+            radius: Theme.radiusControl
+            color: editButton.down    ? Theme.btnPrimaryPress
+                 : editButton.hovered ? Theme.btnPrimaryHover
+                 :                      Theme.btnPrimaryBg
+            border.width: Theme.strokeControl
+            border.color: Theme.btnPrimaryBorder
         }
         contentItem: Text {
             anchors.centerIn: parent
             text: editButton.text
-            color: "#c8ddff"
+            color: Theme.btnPrimaryText
             font: editButton.font
         }
         onClicked: {
@@ -123,10 +124,10 @@ BasePanel {
             delegate: Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 72
-                radius: 10
-                color: "#0D131C"
-                border.width: 1
-                border.color: "#141C27"
+                radius: Theme.radiusCard
+                color: Theme.surfaceInset
+                border.width: Theme.strokeControl
+                border.color: Theme.border
 
                 property color accent: modeColor(mode)
 
@@ -148,14 +149,16 @@ BasePanel {
 
                         Text {
                             text: mode
-                            color: "#DCE7F5"
-                            font.pixelSize: 16
+                            color: Theme.textPrimary
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontH2
                             font.bold: true
                         }
 
                         Text {
                             text: "Flight Mode"
-                            color: "#7B8798"
+                            color: Theme.textTertiary
+                            font.family: Theme.fontFamily
                             font.pixelSize: 12
                         }
                     }
@@ -167,46 +170,46 @@ BasePanel {
 
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 8
-                            color: "#111827"
-                            border.width: 1
-                            border.color: "#1f2a3b"
+                            radius: Theme.radiusCard
+                            color: Theme.background
+                            border.width: Theme.strokeControl
+                            border.color: Theme.border
 
                             Column {
                                 anchors.centerIn: parent
                                 spacing: 2
-                                Text { text: "P"; color: "#9AA7B7"; font.pixelSize: 12; font.bold: true; horizontalAlignment: Text.AlignHCenter }
-                                Text { text: formatGain(pGain); color: "#E5E7EB"; font.pixelSize: 16; font.bold: true; horizontalAlignment: Text.AlignHCenter }
+                                Text { text: "P"; color: Theme.textTertiary; font.family: Theme.fontFamily; font.pixelSize: 12; font.bold: true; horizontalAlignment: Text.AlignHCenter }
+                                Text { text: formatGain(pGain); color: Theme.textPrimary; font.family: Theme.monoFamily; font.pixelSize: Theme.fontH2; font.bold: true; horizontalAlignment: Text.AlignHCenter }
                             }
                         }
 
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 8
-                            color: "#111827"
-                            border.width: 1
-                            border.color: "#1f2a3b"
+                            radius: Theme.radiusCard
+                            color: Theme.background
+                            border.width: Theme.strokeControl
+                            border.color: Theme.border
 
                             Column {
                                 anchors.centerIn: parent
                                 spacing: 2
-                                Text { text: "I"; color: "#9AA7B7"; font.pixelSize: 12; font.bold: true; horizontalAlignment: Text.AlignHCenter }
-                                Text { text: formatGain(iGain); color: "#E5E7EB"; font.pixelSize: 16; font.bold: true; horizontalAlignment: Text.AlignHCenter }
+                                Text { text: "I"; color: Theme.textTertiary; font.family: Theme.fontFamily; font.pixelSize: 12; font.bold: true; horizontalAlignment: Text.AlignHCenter }
+                                Text { text: formatGain(iGain); color: Theme.textPrimary; font.family: Theme.monoFamily; font.pixelSize: Theme.fontH2; font.bold: true; horizontalAlignment: Text.AlignHCenter }
                             }
                         }
 
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 8
-                            color: "#111827"
-                            border.width: 1
-                            border.color: "#1f2a3b"
+                            radius: Theme.radiusCard
+                            color: Theme.background
+                            border.width: Theme.strokeControl
+                            border.color: Theme.border
 
                             Column {
                                 anchors.centerIn: parent
                                 spacing: 2
-                                Text { text: "D"; color: "#9AA7B7"; font.pixelSize: 12; font.bold: true; horizontalAlignment: Text.AlignHCenter }
-                                Text { text: formatGain(dGain); color: "#E5E7EB"; font.pixelSize: 16; font.bold: true; horizontalAlignment: Text.AlignHCenter }
+                                Text { text: "D"; color: Theme.textTertiary; font.family: Theme.fontFamily; font.pixelSize: 12; font.bold: true; horizontalAlignment: Text.AlignHCenter }
+                                Text { text: formatGain(dGain); color: Theme.textPrimary; font.family: Theme.monoFamily; font.pixelSize: Theme.fontH2; font.bold: true; horizontalAlignment: Text.AlignHCenter }
                             }
                         }
                     }
@@ -225,10 +228,10 @@ BasePanel {
         padding: 0
 
         background: Rectangle {
-            color: "#0D131C"
+            color: Theme.surfaceInset
             radius: 12
-            border.width: 1
-            border.color: "#1f2a3b"
+            border.width: Theme.strokeControl
+            border.color: Theme.border
         }
 
         ColumnLayout {
@@ -239,7 +242,7 @@ BasePanel {
             ColumnLayout {
                 spacing: 4
                 Layout.fillWidth: true
-                Text { text: "Edit PID Values"; color: '#ffffff'; font.pixelSize: 20; font.bold: true }
+                Text { text: "Edit PID Values"; color: Theme.textPrimary; font.family: Theme.fontFamily; font.pixelSize: 20; font.bold: true }
             }
 
             Repeater {
@@ -253,7 +256,8 @@ BasePanel {
                     Text {
                         text: modelData.mode
                         color: modeColor(modelData.mode)
-                        font.pixelSize: 16
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontH2
                         font.bold: true
                     }
 
@@ -266,15 +270,16 @@ BasePanel {
                             Layout.maximumWidth: Layout.preferredWidth
                             text: modelData.pGain
                             placeholderText: "P"
-                            color: '#ffffff'
-                            font.pixelSize: 14
+                            color: Theme.textPrimary
+                            font.family: Theme.monoFamily
+                            font.pixelSize: Theme.fontBody
                             inputMethodHints: Qt.ImhFormattedNumbersOnly
                             validator: DoubleValidator { decimals: 4 }
                             background: Rectangle {
-                                radius: 8
-                                color: "#111827"
-                                border.width: 1
-                                border.color: "#1f2a3b"
+                                radius: Theme.radiusCard
+                                color: Theme.background
+                                border.width: Theme.strokeControl
+                                border.color: Theme.border
                             }
                             onTextChanged: editBuffer[index].pGain = text
                         }
@@ -284,15 +289,16 @@ BasePanel {
                             Layout.maximumWidth: Layout.preferredWidth
                             text: modelData.iGain
                             placeholderText: "I"
-                            color: '#ffffff'
-                            font.pixelSize: 14
+                            color: Theme.textPrimary
+                            font.family: Theme.monoFamily
+                            font.pixelSize: Theme.fontBody
                             inputMethodHints: Qt.ImhFormattedNumbersOnly
                             validator: DoubleValidator { decimals: 4 }
                             background: Rectangle {
-                                radius: 8
-                                color: "#111827"
-                                border.width: 1
-                                border.color: "#1f2a3b"
+                                radius: Theme.radiusCard
+                                color: Theme.background
+                                border.width: Theme.strokeControl
+                                border.color: Theme.border
                             }
                             onTextChanged: editBuffer[index].iGain = text
                         }
@@ -302,15 +308,16 @@ BasePanel {
                             Layout.maximumWidth: Layout.preferredWidth
                             text: modelData.dGain
                             placeholderText: "D"
-                            color: '#ffffff'
-                            font.pixelSize: 14
+                            color: Theme.textPrimary
+                            font.family: Theme.monoFamily
+                            font.pixelSize: Theme.fontBody
                             inputMethodHints: Qt.ImhFormattedNumbersOnly
                             validator: DoubleValidator { decimals: 4 }
                             background: Rectangle {
-                                radius: 8
-                                color: "#111827"
-                                border.width: 1
-                                border.color: "#1f2a3b"
+                                radius: Theme.radiusCard
+                                color: Theme.background
+                                border.width: Theme.strokeControl
+                                border.color: Theme.border
                             }
                             onTextChanged: editBuffer[index].dGain = text
                         }
@@ -328,17 +335,18 @@ BasePanel {
                     id: cancelButton
                     text: "Cancel"
                     padding: 10
-                    font.pixelSize: 14
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontBody
                     background: Rectangle {
-                        radius: 10
-                        color: "#1a2332"
-                        border.width: 1
-                        border.color: "#273246"
+                        radius: Theme.radiusControl
+                        color: Theme.btnSecondaryBg
+                        border.width: Theme.strokeControl
+                        border.color: Theme.btnSecondaryBorder
                     }
                     contentItem: Text {
                         anchors.centerIn: parent
                         text: cancelButton.text
-                        color: "#c8d5e7"
+                        color: Theme.btnSecondaryText
                         font: cancelButton.font
                     }
                     onClicked: editorPopup.close()
@@ -348,19 +356,20 @@ BasePanel {
                     id: saveButton
                     text: "Save Changes"
                     padding: 10
-                    font.pixelSize: 14
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontBody
                     background: Rectangle {
-                        radius: 10
-                        color: saveButton.down    ? "#1f3a6d"
-                             : saveButton.hovered ? "#1b335f"
-                             :                      "#152844"
-                        border.width: 1
-                        border.color: "#2c4a7a"
+                        radius: Theme.radiusControl
+                        color: saveButton.down    ? Theme.btnPrimaryPress
+                             : saveButton.hovered ? Theme.btnPrimaryHover
+                             :                      Theme.btnPrimaryBg
+                        border.width: Theme.strokeControl
+                        border.color: Theme.btnPrimaryBorder
                     }
                     contentItem: Text {
                         anchors.centerIn: parent
                         text: saveButton.text
-                        color: "#c8ddff"
+                        color: Theme.btnPrimaryText
                         font: saveButton.font
                     }
                     onClicked: applyEdits()

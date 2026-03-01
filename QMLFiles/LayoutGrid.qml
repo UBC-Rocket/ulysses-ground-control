@@ -1,13 +1,14 @@
 // LayoutGrid.qml
 import QtQuick
 import QtQuick.Layouts
+import "Items"
 
 GridLayout {
     id: grid
     columns: 4
     flow: GridLayout.LeftToRight
-    rowSpacing: 5
-    columnSpacing: 5
+    rowSpacing: Theme.gridSpacing
+    columnSpacing: Theme.gridSpacing
     anchors.fill: parent
     anchors.topMargin: 2
 
@@ -54,9 +55,16 @@ GridLayout {
 
     // Panel_System_Alert
     Item {
-        Layout.row: 1; Layout.column: 2; Layout.columnSpan: 2
+        Layout.row: 1; Layout.column: 2
         Layout.fillWidth: true; Layout.fillHeight: true
         Panel_System_Alert { anchors.fill: parent }
+    }
+
+    // Panel_System_Health
+    Item {
+        Layout.row: 1; Layout.column: 3
+        Layout.fillWidth: true; Layout.fillHeight: true
+        Panel_System_Health { anchors.fill: parent }
     }
 }
 
