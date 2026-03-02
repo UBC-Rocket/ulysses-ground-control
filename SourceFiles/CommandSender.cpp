@@ -132,3 +132,10 @@ bool CommandSender::sendFlightCommand(int which, int commandType) {
     emit messageSent(QString("FlightCommand %1").arg(commandType));
     return true;
 }
+
+bool CommandSender::sendPIDValues(int which, const QVariantList& PIDValues) {
+    // TODO: handle sending the PID values
+
+    return false;
+
+}

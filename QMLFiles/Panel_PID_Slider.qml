@@ -7,11 +7,17 @@ import "Items"
 BasePanel {
     id: pidPanel
 
+    signal commandTriggered(int which, var code)
+
     // Emits whenever the user saves new gains in the editor.
     signal pidGainsUpdated(string mode, double pGain, double iGain, double dGain)
 
     property int displayPrecision: 2
     property var editBuffer: []
+    property var pidValues: []
+
+    // TODO: check if channel 1 is valid for PID Value sending
+    property int which = 1;
 
     // Local store of PID gains for each mode.
     ListModel {
@@ -52,6 +58,7 @@ BasePanel {
     }
 
     function applyEdits() {
+
         for (let idx = 0; idx < editBuffer.length; ++idx) {
             const current = pidModel.get(idx)
             const updated = editBuffer[idx] || {}
@@ -60,13 +67,21 @@ BasePanel {
             const iVal = sanitizedNumber(updated.iGain, current.iGain)
             const dVal = sanitizedNumber(updated.dGain, current.dGain)
 
+            pidValues[idx * 3] = pVal
+            pidValues[idx * 3 + 1] = iVal
+            pidValues[idx * 3 + 2] = dVal
+
             pidModel.setProperty(idx, "pGain", pVal)
             pidModel.setProperty(idx, "iGain", iVal)
             pidModel.setProperty(idx, "dGain", dVal)
 
             pidPanel.pidGainsUpdated(current.mode, pVal, iVal, dVal)
         }
+
+        pidPanel.commandTriggered(which, pidValues);
+
         editorPopup.close()
+
     }
 
     BaseHeader {
@@ -375,6 +390,13 @@ BasePanel {
                     onClicked: applyEdits()
                 }
             }
+        }
+    }
+    // --- Signal wiring: when a card is clicked, forward the code to the C++ CommandSender object ---
+    Connections {
+        target: pidPanel
+        function onCommandTriggered(txWhich, code) {
+            commandsender.sendPIDValues(txWhich, code) // Delegate to Q_INVOKABLE; panel stays transport-agnostic.
         }
     }
 }
