@@ -213,15 +213,7 @@ void SensorDataModel::applyDownlink(int which, const void* downlinkStruct)
             rawZ = radToDeg(t->angular_rate.z);
         }
 
-        }
-
         // Raw angular rates (rad/s) → deg/s for display alongside Euler angles.
-        double rawX = 0.0, rawY = 0.0, rawZ = 0.0;
-        if (t->has_angular_rate) {
-            rawX = radToDeg(t->angular_rate.x);
-            rawY = radToDeg(t->angular_rate.y);
-            rawZ = radToDeg(t->angular_rate.z);
-        }
 
         // Position [m]: altitude from z, horizontal from x/y.
         double alt = m_altitude, px = m_posX, py = m_posY;
