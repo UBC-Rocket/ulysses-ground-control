@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import "Items"
+import "../Items"
 
 BasePanel {
     id: panel_System_Health
