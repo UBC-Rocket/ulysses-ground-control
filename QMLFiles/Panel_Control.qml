@@ -16,23 +16,9 @@ Rectangle {
     width: (parent.parent.width - 20)/4 - 5    // Sized to occupy quarter-width of parent area with margins.
 
     // --- Header area: static title for the command section ---
-    Rectangle {
-        id: header
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.topMargin: 15
-        anchors.leftMargin: 15
-        height: 50
-        color: "transparent"
-
-        Text {
-            id: header_Command
-            color: Theme.accent
-            text: "Command Controls" // Section label shown at the top of the panel.
-            font.family: Theme.fontFamily
-            font.pixelSize: Theme.fontH1
-            font.bold: true
-        }
+    BaseHeader {
+        id:header
+        headerText: "Command Controls"
     }
 
     // --- Card grid: container that lays out interactive command tiles in 2 columns ---
@@ -123,7 +109,7 @@ Rectangle {
             Loader {
                 anchors.fill: parent
                 sourceComponent: cmdCard
-                onLoaded: { item.title = "Arm";    item.cmd = 1 } // Initialize instance properties.
+                onLoaded: { item.title = "Arm"; item.cmd = 1 } // Initialize instance properties.
             }
         }
 
@@ -134,7 +120,7 @@ Rectangle {
             Loader {
                 anchors.fill: parent
                 sourceComponent: cmdCard
-                onLoaded: { item.title = "Launch";   item.cmd = 2 }
+                onLoaded: { item.title = "Launch"; item.cmd = 2 }
             }
         }
 
@@ -156,7 +142,7 @@ Rectangle {
             Loader {
                 anchors.fill: parent
                 sourceComponent: cmdCard
-                onLoaded: { item.title = "Land";     item.cmd = 4 }
+                onLoaded: { item.title = "Land"; item.cmd = 4 }
             }
         }
     }
