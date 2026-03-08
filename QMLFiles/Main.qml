@@ -66,6 +66,7 @@ ApplicationWindow {
         radioConsole.requestActivate()
     }
 
+    // Top-right button to open the radio window
     function openRadioOutput() {
         if (!radioOutput) {
             radioOutput = radioOutputComponent.createObject(window, {

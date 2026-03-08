@@ -103,16 +103,17 @@ bool CommandSender::sendFlightCommand(int which, int commandType) {
     }
     
     // 1. Create FlightCommand message
-    tvr_FlightCommand cmd = tvr_FlightCommand_init_zero;
-    cmd.which_payload = tvr_FlightCommand_state_cmd_tag;  // Set oneof
-    cmd.payload.state_cmd.type = (tvr_StateCommand_Type)commandType;  // Set type
+    tvr_flight_command_t cmd = TVR_FLIGHT_COMMAND_INIT_ZERO;
+    cmd.which_payload = TVR_FLIGHT_COMMAND_STATE_CMD_TAG; // set oneof
+    cmd.payload.state_cmd.type = (tvr_state_command_type_t)commandType; // set type
+
     
     // 2. Encode to COBS packet
     uint8_t packet[300];
     rp_packet_encode_result_t result = rp_packet_encode(
         packet,
         sizeof(packet),
-        tvr_FlightCommand_fields,
+        TVR_FLIGHT_COMMAND_FIELDS,
         &cmd
     );
     
@@ -131,4 +132,54 @@ bool CommandSender::sendFlightCommand(int which, int commandType) {
     
     emit messageSent(QString("FlightCommand %1").arg(commandType));
     return true;
+}
+
+bool CommandSender::sendPIDValues(int which, const QVariantList& PIDValues) {
+    // TODO: handle sending the PID values
+
+    if (!validWhich(which)) {
+        emit errorOccurred("which must be 1 or 2");
+        return false;
+    }
+    
+    if (!m_bridge) {
+        emit errorOccurred("No bridge");
+        return false;
+    }
+
+    tvr_set_pid_t pid = TVR_SET_PID_INIT_ZERO;
+
+    pid.x1 = (float)PIDValues[0].toDouble();
+    pid.x2 = (float)PIDValues[1].toDouble();
+    pid.x3 = (float)PIDValues[2].toDouble();
+    pid.x4 = (float)PIDValues[3].toDouble();
+    pid.x5 = (float)PIDValues[4].toDouble();
+    pid.x6 = (float)PIDValues[5].toDouble();
+    pid.x7 = (float)PIDValues[6].toDouble();
+    pid.x8 = (float)PIDValues[7].toDouble();
+    pid.x9 = (float)PIDValues[8].toDouble();
+
+    uint8_t packet[300];
+    rp_packet_encode_result_t result = rp_packet_encode(
+        packet,
+        sizeof(packet),
+        TVR_SET_PID_FIELDS,
+        &pid
+    );
+
+    if (result.status != RP_CODEC_OK) {
+        emit errorOccurred("Failed to encode packet");
+        return false;
+    }
+
+    QByteArray data(reinterpret_cast<const char*>(packet), result.written);
+    
+    if (!m_bridge->sendBinary(which, data)) {
+        emit errorOccurred("Failed to send binary packet");
+        return false;
+    }
+    
+    emit messageSent("setPID sent");
+    return true;
+
 }
