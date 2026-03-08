@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Basic as Basic
 import QtQuick.Layouts
-import "Items"
+import "../Items"
 
 BasePanel {
     id: pidPanel

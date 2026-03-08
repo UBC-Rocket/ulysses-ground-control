@@ -2,24 +2,20 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Controls.Basic as Basic   // skinnable controls
-import "Items"
+import "../Items"
 
-Rectangle {
+BasePanel {
     id: panel
-    color: Theme.surface
-    border.color: Theme.border
-    border.width: Theme.strokePanel
-    radius: Theme.radiusPanel
-    height: (parent.parent.height - 20)/2
-    width:  (parent.parent.width  - 20)/2  - 5
 
     // ---------- Header (left aligned) ----------
     RowLayout {
         id: headerRow
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.margins: 12
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+            margins: 12
+        }
         spacing: 8
 
         Text {
@@ -131,17 +127,25 @@ Rectangle {
 
                 // left stripe (exact color)
                 Rectangle {
-                    anchors.left: parent.left; anchors.top: parent.top; anchors.bottom: parent.bottom
-                    width: 8; radius: 4; color: card.stripe
+                    anchors {
+                        left: parent.left
+                        top: parent.top
+                        bottom: parent.bottom
+                    }
+                    width: 8;
+                    radius: 4;
+                    color: card.stripe
                 }
 
                 // content
                 RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: padX + 8
-                    anchors.rightMargin: padX
-                    anchors.topMargin: padY
-                    anchors.bottomMargin: padY
+                    anchors {
+                        fill: parent
+                        leftMargin: padX + 8;
+                        rightMargin: padX
+                        topMargin: padY
+                        bottomMargin: padY
+                    }
                     spacing: 10
 
                     // timestamp + chip stacked
