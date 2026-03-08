@@ -3,17 +3,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import "Items"
 
-Rectangle {
+BasePanel {
     id: control_panel
     property int txWhich: 1
     signal commandTriggered(int which, string code) // Public signal: emitted when a command card is clicked; parent can handle it.
-
-    color: Theme.surface
-    border.color: Theme.border
-    border.width: Theme.strokePanel
-    radius: Theme.radiusPanel
-    height: (parent.parent.height - 20)/2 - 10 // Sized to occupy half-height of parent area with margins.
-    width: (parent.parent.width - 20)/4 - 5    // Sized to occupy quarter-width of parent area with margins.
 
     // --- Header area: static title for the command section ---
     BaseHeader {
