@@ -42,10 +42,16 @@ ApplicationWindow {
     }
 
     property var radioConsole: null
+    property var radioOutput: null
 
     Component {
         id: radioConsoleComponent
         RadioTestWindow { }
+    }
+
+    Component {
+        id: radioOutputComponent
+        RadioOutputWindow { }
     }
 
     function openRadioConsole() {
@@ -61,6 +67,52 @@ ApplicationWindow {
     }
 
     // Top-right button to open the radio window
+    function openRadioOutput() {
+        if (!radioOutput) {
+            radioOutput = radioOutputComponent.createObject(window, {
+                x: window.x + 40,
+                y: window.y + 40
+            })
+        }
+        radioOutput.show()
+        radioOutput.raise()
+        radioOutput.requestActivate()
+    }
+
+    // Bottom-right button to open the radio output window
+    Basic.Button {
+        id: openRadioOutputBtn
+        text: "Radio Output"
+        anchors.bottom: parent.bottom
+        anchors.right: openRadioBtn.left
+        anchors.margins: 8
+        z: 9999
+        hoverEnabled: true
+        padding: 10
+        font.family: Theme.fontFamily
+        font.pixelSize: Theme.fontBody
+
+        background: Rectangle {
+            radius: Theme.radiusControl
+            color: openRadioOutputBtn.down    ? Theme.btnPrimaryPress
+                 : openRadioOutputBtn.hovered ? Theme.btnPrimaryHover
+                 :                              Theme.btnPrimaryBg
+            border.width: Theme.strokeControl
+            border.color: Theme.btnPrimaryBorder
+            Behavior on color { ColorAnimation { duration: Theme.transitionFast } }
+        }
+        contentItem: Text {
+            text: openRadioOutputBtn.text
+            color: Theme.btnPrimaryText
+            font: openRadioOutputBtn.font
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+        }
+
+        onClicked: openRadioOutput()
+    }
+
+    // Bottom-right button to open the radio console window
     Basic.Button {
         id: openRadioBtn
         text: "Open Radio Console"

@@ -25,9 +25,9 @@ set(ROCKET_PROTOCOL_SRC
 # Add nanopb
 # ----------------------------------------------------------------------
 set(NANOPB_SRC
-    ${CMAKE_CURRENT_SOURCE_DIR}/nanopb/pb_encode.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/nanopb/pb_decode.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/nanopb/pb_common.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/nanopb/pb_encode.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/nanopb/pb_decode.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/nanopb/pb_common.c
 )
 
 # ----------------------------------------------------------------------
@@ -64,7 +64,7 @@ set(QML_DIR  "QMLFiles")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/${HEAD_DIR}")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/include")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/rocket-protocol-lib/generated/tvr")
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/nanopb")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}//rocket-protocol-lib/nanopb")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
 file(GLOB_RECURSE MESH_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "QMLFiles/meshes/*.mesh")
@@ -124,6 +124,7 @@ qt_add_qml_module(ulysses_ground_control
         "${QML_DIR}/Panel_System_Alert.qml"
         "${QML_DIR}/Panel_System_Health.qml"
         "${QML_DIR}/RadioTestWindow.qml"
+        "${QML_DIR}/RadioOutputWindow.qml"
         "${QML_DIR}/Shortcuts.qml"
         "${QML_DIR}/Items/BaseHeader.qml"
         "${QML_DIR}/Items/BasePanel.qml"

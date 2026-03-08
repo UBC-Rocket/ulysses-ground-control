@@ -54,6 +54,12 @@ SensorDataModel::SensorDataModel(SerialBridge* bridge, QObject* parent)
         });
 }
 
+void SensorDataModel::clearRawPacketLog()
+{
+    m_rawPacketLog.clear();
+    emit rawPacketLogChanged();
+}
+
 void SensorDataModel::onBinaryPacketReceived(int which, const QByteArray& packet)
 {
     if (packet.isEmpty())
@@ -68,6 +74,60 @@ void SensorDataModel::onBinaryPacketReceived(int which, const QByteArray& packet
 
     if (result.status != RP_CODEC_OK)
         return;
+    if (result.status != RP_CODEC_OK) {
+        m_rawPacketLog += QStringLiteral("[decode error %1]\n").arg(result.status);
+        emit rawPacketLogChanged();
+        return;
+    }
+
+    // Log decoded fields as readable text
+    if (downlink.which_payload == tvr_Downlink_telemetry_tag) {
+        const tvr_TelemetryState* t = &downlink.payload.telemetry;
+        QString line = QStringLiteral("TELEM t=%1 state=%2 thrust=%3 gx=%4 gy=%5")
+            .arg(t->timestamp_ms)
+            .arg(t->flight_state)
+            .arg(static_cast<double>(t->thrust_cmd))
+            .arg(static_cast<double>(t->gimbal_x))
+            .arg(static_cast<double>(t->gimbal_y));
+        if (t->has_position)
+            line += QStringLiteral(" pos=%1,%2,%3")
+                .arg(static_cast<double>(t->position.x))
+                .arg(static_cast<double>(t->position.y))
+                .arg(static_cast<double>(t->position.z));
+        if (t->has_velocity)
+            line += QStringLiteral(" vel=%1,%2,%3")
+                .arg(static_cast<double>(t->velocity.x))
+                .arg(static_cast<double>(t->velocity.y))
+                .arg(static_cast<double>(t->velocity.z));
+        if (t->has_attitude)
+            line += QStringLiteral(" att=%1,%2,%3,%4")
+                .arg(static_cast<double>(t->attitude.w))
+                .arg(static_cast<double>(t->attitude.x))
+                .arg(static_cast<double>(t->attitude.y))
+                .arg(static_cast<double>(t->attitude.z));
+        if (t->has_angular_rate)
+            line += QStringLiteral(" gyro=%1,%2,%3")
+                .arg(static_cast<double>(t->angular_rate.x))
+                .arg(static_cast<double>(t->angular_rate.y))
+                .arg(static_cast<double>(t->angular_rate.z));
+        m_rawPacketLog += line + "\n";
+    } else if (downlink.which_payload == tvr_Downlink_status_tag) {
+        const tvr_SystemStatus* s = &downlink.payload.status;
+        m_rawPacketLog += QStringLiteral(
+            "STATUS t=%1 up=%2 state=%3 accel=%4 gyro=%5 b1=%6 b2=%7 gps=%8 rx=%9 tx=%10 cmd=%11\n")
+            .arg(s->timestamp_ms)
+            .arg(s->uptime_ms)
+            .arg(s->flight_state)
+            .arg(s->accel_ok)
+            .arg(s->gyro_ok)
+            .arg(s->baro1_ok)
+            .arg(s->baro2_ok)
+            .arg(s->gps_connected)
+            .arg(s->radio_rx_count)
+            .arg(s->radio_tx_count)
+            .arg(s->cmd_rx_count);
+    }
+    emit rawPacketLogChanged();
 
     applyDownlink(which, &downlink);
 }
@@ -143,6 +203,16 @@ void SensorDataModel::applyDownlink(int which, const void* downlinkStruct)
             filtX = radToDeg(roll);
             filtY = radToDeg(pitch);
             filtZ = radToDeg(yaw);
+        }
+
+        // Raw angular rates (rad/s) → deg/s for display alongside Euler angles.
+        double rawX = 0.0, rawY = 0.0, rawZ = 0.0;
+        if (t->has_angular_rate) {
+            rawX = radToDeg(t->angular_rate.x);
+            rawY = radToDeg(t->angular_rate.y);
+            rawZ = radToDeg(t->angular_rate.z);
+        }
+
         }
 
         // Raw angular rates (rad/s) → deg/s for display alongside Euler angles.
