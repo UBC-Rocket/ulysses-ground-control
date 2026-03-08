@@ -38,6 +38,9 @@ public:
     // Telemetry
     Q_PROPERTY(double velocity READ velocity NOTIFY telemetryDataChanged)
 
+    // Raw packet log (hex dump of every received binary packet)
+    Q_PROPERTY(QString rawPacketLog READ rawPacketLog NOTIFY rawPacketLogChanged)
+
     // SystemStatus properties
     Q_PROPERTY(int     flightState   READ flightState   NOTIFY statusReceived)
     Q_PROPERTY(quint32 uptimeMs      READ uptimeMs      NOTIFY statusReceived)
@@ -79,6 +82,9 @@ public:
     quint32 radioTxCount() const { return m_radioTxCount; }
     quint32 cmdRxCount()   const { return m_cmdRxCount; }
 
+    QString rawPacketLog() const { return m_rawPacketLog; }
+    Q_INVOKABLE void clearRawPacketLog();
+
 public slots:
     /// Entry point for binary COBS packets; decode Downlink and update model.
     void onBinaryPacketReceived(int which, const QByteArray& packet);
@@ -104,6 +110,7 @@ signals:
     void engineDataChanged();
     void telemetryDataChanged();
     void statusReceived();
+    void rawPacketLogChanged();
 
 private:
     // Backing storage for the latest sensor values
@@ -135,6 +142,8 @@ private:
     quint32 m_radioRxCount = 0;
     quint32 m_radioTxCount = 0;
     quint32 m_cmdRxCount   = 0;
+
+    QString m_rawPacketLog;
 
     /// Update model from decoded Downlink (TelemetryState or SystemStatus).
     void applyDownlink(int which, const void* downlinkStruct);
