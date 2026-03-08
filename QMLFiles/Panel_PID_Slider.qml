@@ -17,7 +17,7 @@ BasePanel {
     property var pidValues: []
 
     // TODO: check if channel 1 is valid for PID Value sending
-    property int which = 1;
+    property int which: 1
 
     // Local store of PID gains for each mode.
     ListModel {
