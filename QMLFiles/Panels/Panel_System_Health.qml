@@ -113,7 +113,7 @@ BasePanel {
 
         size: 2
         boxHeight: 56
-        dataNames: ["UPTIME (s)", "CMD RX"]
+        dataNames: ["UPTIME (s)", "CMD TX"]
         dataValues: [
             sensorData.uptimeMs / 1000,
             sensorData.cmdRxCount
