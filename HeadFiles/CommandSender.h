@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QTimer>
+#include <QVariantList>
 #include <cstdint>
 
 
@@ -25,6 +26,9 @@ public:
 
     /// Send a FlightCommand via encoded protobuf packet
     Q_INVOKABLE bool sendFlightCommand(int which, int commandType);
+
+    /// Send PID values for the given channel (1 or 2) as a list of 9 floats.
+    Q_INVOKABLE bool sendPIDValues(int which, const QVariantList& PIDValues);
 
     // -----------------------
     // Periodic test helpers
