@@ -65,12 +65,12 @@ void SensorDataModel::onBinaryPacketReceived(int which, const QByteArray& packet
     if (packet.isEmpty())
         return;
 
-    tvr_Downlink downlink = tvr_Downlink_init_default;
+    tvr_downlink_t downlink = TVR_DOWNLINK_INIT_DEFAULT;
     const uint8_t* data = reinterpret_cast<const uint8_t*>(packet.constData());
     size_t size = static_cast<size_t>(packet.size());
 
     rp_packet_decode_result_t result =
-        rp_packet_decode(data, size, &tvr_Downlink_msg, &downlink);
+        rp_packet_decode(data, size, &tvr_downlink_t_msg, &downlink);
 
     if (result.status != RP_CODEC_OK)
         return;
@@ -81,8 +81,8 @@ void SensorDataModel::onBinaryPacketReceived(int which, const QByteArray& packet
     }
 
     // Log decoded fields as readable text
-    if (downlink.which_payload == tvr_Downlink_telemetry_tag) {
-        const tvr_TelemetryState* t = &downlink.payload.telemetry;
+    if (downlink.which_payload == TVR_DOWNLINK_TELEMETRY_TAG) {
+        const tvr_telemetry_state_t* t = &downlink.payload.telemetry;
         QString line = QStringLiteral("TELEM t=%1 state=%2 thrust=%3 gx=%4 gy=%5")
             .arg(t->timestamp_ms)
             .arg(t->flight_state)
@@ -111,8 +111,8 @@ void SensorDataModel::onBinaryPacketReceived(int which, const QByteArray& packet
                 .arg(static_cast<double>(t->angular_rate.y))
                 .arg(static_cast<double>(t->angular_rate.z));
         m_rawPacketLog += line + "\n";
-    } else if (downlink.which_payload == tvr_Downlink_status_tag) {
-        const tvr_SystemStatus* s = &downlink.payload.status;
+    } else if (downlink.which_payload == TVR_DOWNLINK_STATUS_TAG) {
+        const tvr_system_status_t* s = &downlink.payload.status;
         m_rawPacketLog += QStringLiteral(
             "STATUS t=%1 up=%2 state=%3 accel=%4 gyro=%5 b1=%6 b2=%7 gps=%8 rx=%9 tx=%10 cmd=%11\n")
             .arg(s->timestamp_ms)
@@ -174,10 +174,10 @@ void SensorDataModel::updateTelemetry(double velocity)
 void SensorDataModel::applyDownlink(int which, const void* downlinkStruct)
 {
     Q_UNUSED(which);
-    const tvr_Downlink* d = static_cast<const tvr_Downlink*>(downlinkStruct);
+    const tvr_downlink_t* d = static_cast<const tvr_downlink_t*>(downlinkStruct);
 
-    if (d->which_payload == tvr_Downlink_telemetry_tag) {
-        const tvr_TelemetryState* t = &d->payload.telemetry;
+    if (d->which_payload == TVR_DOWNLINK_TELEMETRY_TAG) {
+        const tvr_telemetry_state_t* t = &d->payload.telemetry;
 
         if (kDownlinkDebug) {
             qDebug() << "TelemetryState: has_pos=" << t->has_position
@@ -189,7 +189,7 @@ void SensorDataModel::applyDownlink(int which, const void* downlinkStruct)
         // Velocity magnitude [m/s] → km/h
         double vel = m_velocity;
         if (t->has_velocity) {
-            const tvr_Vec3* v = &t->velocity;
+            const tvr_vec3_t* v = &t->velocity;
             double vx = static_cast<double>(v->x), vy = static_cast<double>(v->y), vz = static_cast<double>(v->z);
             vel = std::sqrt(vx * vx + vy * vy + vz * vz) * 3.6;
         }
@@ -238,8 +238,8 @@ void SensorDataModel::applyDownlink(int which, const void* downlinkStruct)
         // Emit statusReceived so flightState binding updates from telemetry too.
         emit statusReceived();
 
-    } else if (d->which_payload == tvr_Downlink_status_tag) {
-        const tvr_SystemStatus* s = &d->payload.status;
+    } else if (d->which_payload == TVR_DOWNLINK_STATUS_TAG) {
+        const tvr_system_status_t* s = &d->payload.status;
 
         if (kDownlinkDebug) {
             qDebug() << "SystemStatus: flight_state=" << s->flight_state
