@@ -16,23 +16,9 @@ Rectangle {
     width: (parent.parent.width - 20)/4 - 5    // Sized to occupy quarter-width of parent area with margins.
 
     // --- Header area: static title for the command section ---
-    Rectangle {
-        id: header
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.topMargin: 15
-        anchors.leftMargin: 15
-        height: 50
-        color: "transparent"
-
-        Text {
-            id: header_Command
-            color: Theme.accent
-            text: "Command Controls" // Section label shown at the top of the panel.
-            font.family: Theme.fontFamily
-            font.pixelSize: Theme.fontH1
-            font.bold: true
-        }
+    BaseHeader {
+        id:header
+        headerText: "Command Controls"
     }
 
     // --- Card grid: container that lays out interactive command tiles in 2 columns ---
@@ -48,70 +34,8 @@ Rectangle {
         columnSpacing: 16
 
         // --- Reusable command card component: displays a title and the code it sends ---
-        Component {
+        CommandCard {
             id: cmdCard
-            Rectangle {
-                anchors.fill: parent
-                radius: Theme.radiusCard
-                border.width: Theme.strokeControl
-                border.color: Theme.accentMuted        // Visual affordance to indicate clickability.
-                color: hovered ? Theme.accentSubtle : Theme.surfaceInset // Hover feedback without relayout.
-
-                property string title: ""       // User-facing name of the command (e.g., "Hover").
-                property string cmd: ""         // Actual single-letter code to emit (e.g., "H").
-
-                readonly property bool hovered: ma.containsMouse // Centralized hover state for styling.
-                Behavior on color { ColorAnimation { duration: Theme.transitionFast } } // Smooth hover color transition.
-                Behavior on scale { NumberAnimation { duration: 90 } } // Brief press/release animation.
-
-                // --- Text stack: shows the command name and a short hint with the code to be sent ---
-                Column {
-                    id: labelCol
-                    anchors.centerIn: parent
-                    spacing: 6
-                    width: parent.width * 0.82
-
-                    Text {
-                        text: title
-                        color: Theme.textPrimary
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 18
-                        font.bold: true
-                        horizontalAlignment: Text.AlignHCenter
-                        wrapMode: Text.WordWrap
-                        width: parent.width
-                    }
-                    Text {
-                        text: 'sends "' + cmd + '"' // Secondary hint: shows the code that will be sent.
-                        color: Theme.textSecondary
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 12
-                        horizontalAlignment: Text.AlignHCenter
-                        wrapMode: Text.WordWrap
-                        width: parent.width
-                    }
-                }
-
-                // --- Subtle inner outline: aesthetic highlight to match the panel style ---
-                Rectangle {
-                    anchors.fill: parent
-                    radius: parent.radius
-                    color: "transparent"
-                    border.width: 1
-                    border.color: Theme.accentMuted
-                    opacity: 0.20
-                }
-
-                // --- Mouse handler: emits the panel's signal with this card's code when clicked ---
-                MouseArea {
-                    id: ma
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onPressed: parent.scale = 0.985 // Tactile press effect (shrinks slightly).
-                    onReleased: parent.scale = 1.0  // Reset scale on release.
-                    onClicked: control_panel.commandTriggered(txWhich, cmd) // Raise event upward with payload.
-                }
-            }
         }
 
         // --- Four grid items below instantiate the reusable card with different title/code pairs ---
@@ -123,7 +47,7 @@ Rectangle {
             Loader {
                 anchors.fill: parent
                 sourceComponent: cmdCard
-                onLoaded: { item.title = "Arm";    item.cmd = 1 } // Initialize instance properties.
+                onLoaded: { item.title = "Arm"; item.cmd = 1 } // Initialize instance properties.
             }
         }
 
@@ -134,7 +58,7 @@ Rectangle {
             Loader {
                 anchors.fill: parent
                 sourceComponent: cmdCard
-                onLoaded: { item.title = "Launch";   item.cmd = 2 }
+                onLoaded: { item.title = "Launch"; item.cmd = 2 }
             }
         }
 
@@ -156,7 +80,7 @@ Rectangle {
             Loader {
                 anchors.fill: parent
                 sourceComponent: cmdCard
-                onLoaded: { item.title = "Land";     item.cmd = 4 }
+                onLoaded: { item.title = "Land"; item.cmd = 4 }
             }
         }
     }
