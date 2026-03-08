@@ -15,11 +15,11 @@ GridLayout {
 
     // ───── Row 0 ──────────────────────────────────────────────────────────
 
-    // Panel_Kalma_and_Engine
+    // Panel_Angles_And_Engine
     Item {
         Layout.row: 0; Layout.column: 0
         Layout.fillWidth: true; Layout.fillHeight: true
-        Panel_Kalman_and_Engine {
+        Panel_Angles_And_Engine {
             anchors.fill: parent
         }
     }
@@ -31,20 +31,20 @@ GridLayout {
         Panel_Rocket_Visualization { anchors.fill: parent }
     }
 
-    // Panel_Baro_And_Telemetry_Data
+    // Panel_State_And_Position
     Item {
         Layout.row: 0; Layout.column: 3
         Layout.fillWidth: true; Layout.fillHeight: true
-        Panel_Baro_And_Telemetry_Data { anchors.fill: parent }
+        Panel_State_And_Position { anchors.fill: parent }
     }
 
     // ───── Row 1 ──────────────────────────────────────────────────────────
 
-    // Panel_PID_Slider
+    // Panel_PID_Controller
     Item {
         Layout.row: 1; Layout.column: 0
         Layout.fillWidth: true; Layout.fillHeight: true
-        Panel_PID_Slider { anchors.fill: parent }
+        Panel_PID_Controller { anchors.fill: parent }
     }
 
     // Panel_Control

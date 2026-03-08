@@ -2,7 +2,7 @@ import QtQuick
 import "../Items"
 
 BasePanel {
-    id: panel_Baro_And_Telemetry
+    id: panel_State_And_Position
 
     // Position
     property double posX: sensorData.posX
@@ -34,7 +34,7 @@ BasePanel {
 
         DataBoxList {
             anchors.top: position_xy.top
-            width: panel_Baro_And_Telemetry.width;
+            width: panel_State_And_Position.width;
 
             size: 2
             boxHeight: 56
@@ -55,7 +55,7 @@ BasePanel {
 
         DataBoxList {
             anchors.top: altitude_and_velocity.top
-            width: panel_Baro_And_Telemetry.width;
+            width: panel_State_And_Position.width;
 
             size: 2
             boxHeight: 56
@@ -76,12 +76,12 @@ BasePanel {
 
         DataBoxList {
             anchors.top: radio_stats.top
-            width: panel_Baro_And_Telemetry.width;
+            width: panel_State_And_Position.width;
 
             size: 2
             boxHeight: 56
-            dataNames: ["RADIO RX", "RADIO TX"]
-            dataValues: [radioRx, radioTx]
+            dataNames: ["RADIO TX", "RADIO RX"]
+            dataValues: [radioTx, radioRx]
         }
     }
 }

@@ -2,7 +2,7 @@ import QtQuick
 import "../Items"
 
 BasePanel {
-    id: panel_Kalman_and_Engine
+    id: panel_Angles_And_Engine
 
     // ===== Spacing controls =====
     property real sectionSpacing: 6                      // spacing between sections (X->Y->Z->Engine)
@@ -35,7 +35,7 @@ BasePanel {
         color: "transparent"
 
         implicitHeight: subheader_angles.implicitHeight
-                        + panel_Kalman_and_Engine.subheaderToDataSpacing
+                        + panel_Angles_And_Engine.subheaderToDataSpacing
                         + dataBoxListX.height
         height: implicitHeight
 
@@ -43,7 +43,7 @@ BasePanel {
             top: header.bottom
             left: parent.left
             right: parent.right
-            topMargin: panel_Kalman_and_Engine.headerToFirstSectionSpacing
+            topMargin: panel_Angles_And_Engine.headerToFirstSectionSpacing
             leftMargin: header.anchors.leftMargin
             rightMargin: header.anchors.leftMargin
         }
@@ -60,7 +60,7 @@ BasePanel {
         DataBoxList {
             id: dataBoxListX
             anchors.top: subheader_angles.bottom
-            anchors.topMargin: panel_Kalman_and_Engine.subheaderToDataSpacing
+            anchors.topMargin: panel_Angles_And_Engine.subheaderToDataSpacing
             width: parent.width
 
             size: 2
@@ -73,14 +73,14 @@ BasePanel {
     Rectangle {
         id: kalman_angles_y
         color: "transparent"
-        implicitHeight: dataBoxListY.height + panel_Kalman_and_Engine.rowPadding
+        implicitHeight: dataBoxListY.height + panel_Angles_And_Engine.rowPadding
         height: implicitHeight
 
         anchors {
             top: kalman_angles_x.bottom
             left: parent.left
             right: parent.right
-            topMargin: panel_Kalman_and_Engine.sectionSpacing
+            topMargin: panel_Angles_And_Engine.sectionSpacing
             leftMargin: header.anchors.leftMargin
             rightMargin: header.anchors.leftMargin
         }
@@ -99,14 +99,14 @@ BasePanel {
     Rectangle {
         id: kalman_angles_z
         color: "transparent"
-        implicitHeight: dataBoxListZ.height + panel_Kalman_and_Engine.rowPadding
+        implicitHeight: dataBoxListZ.height + panel_Angles_And_Engine.rowPadding
         height: implicitHeight
 
         anchors {
             top: kalman_angles_y.bottom
             left: parent.left
             right: parent.right
-            topMargin: panel_Kalman_and_Engine.sectionSpacing
+            topMargin: panel_Angles_And_Engine.sectionSpacing
             leftMargin: header.anchors.leftMargin
             rightMargin: header.anchors.leftMargin
         }
@@ -127,7 +127,7 @@ BasePanel {
         color: "transparent"
 
         implicitHeight: subheader_engine.implicitHeight
-                        + panel_Kalman_and_Engine.subheaderToDataSpacing
+                        + panel_Angles_And_Engine.subheaderToDataSpacing
                         + dataBoxListEngine.height
         height: implicitHeight
 
@@ -135,7 +135,7 @@ BasePanel {
             top: kalman_angles_z.bottom
             left: parent.left
             right: parent.right
-            topMargin: panel_Kalman_and_Engine.sectionSpacing
+            topMargin: panel_Angles_And_Engine.sectionSpacing
             leftMargin: header.anchors.leftMargin
             rightMargin: header.anchors.leftMargin
         }
@@ -152,7 +152,7 @@ BasePanel {
         DataBoxList {
             id: dataBoxListEngine
             anchors.top: subheader_engine.bottom
-            anchors.topMargin: panel_Kalman_and_Engine.subheaderToDataSpacing
+            anchors.topMargin: panel_Angles_And_Engine.subheaderToDataSpacing
             width: parent.width
 
             size: 3
