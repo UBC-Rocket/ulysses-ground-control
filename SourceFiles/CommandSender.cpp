@@ -148,63 +148,67 @@ bool CommandSender::sendFlightCommand(int which, int commandType) {
 
 
 bool CommandSender::sendPIDValues(int which, const QVariantList& PIDValues) {
-    // TODO: handle sending the PID values
-
-
-    // if (!validWhich(which)) {
-    //     emit errorOccurred("which must be 1 or 2");
-    //     return false;
-    // }
+    if (!validWhich(which)) {
+        emit errorOccurred("which must be 1 or 2");
+        return false;
+    }
    
-    // if (!m_bridge) {
-    //     emit errorOccurred("No bridge");
-    //     return false;
-    // }
+    if (!m_bridge) {
+        emit errorOccurred("No bridge");
+        return false;
+    }
+
+    if (PIDValues.size() < 9) {
+        emit errorOccurred("PIDValues must contain 9 entries");
+        return false;
+    }
+
+    tvr_SetPidGains pid = tvr_SetPidGains_init_zero;
+    pid.has_attitude_kp = true;
+    pid.attitude_kp.x = static_cast<float>(PIDValues[0].toDouble());
+    pid.attitude_kp.y = static_cast<float>(PIDValues[1].toDouble());
+    pid.attitude_kp.z = static_cast<float>(PIDValues[2].toDouble());
+
+    pid.has_attitude_kd = true;
+    pid.attitude_kd.x = static_cast<float>(PIDValues[3].toDouble());
+    pid.attitude_kd.y = static_cast<float>(PIDValues[4].toDouble());
+    pid.attitude_kd.z = static_cast<float>(PIDValues[5].toDouble());
+
+    pid.z_kp = static_cast<float>(PIDValues[6].toDouble());
+    pid.z_ki = static_cast<float>(PIDValues[7].toDouble());
+    pid.z_kd = static_cast<float>(PIDValues[8].toDouble());
+    pid.z_integral_limit = 0.0f;
+
+    tvr_FlightCommand cmd = tvr_FlightCommand_init_zero;
+    cmd.which_payload = tvr_FlightCommand_set_pid_gains_tag;
+    cmd.payload.set_pid_gains = pid;
+
+    uint8_t packet[300];
+    rp_packet_encode_result_t result = rp_packet_encode(
+        packet,
+        sizeof(packet),
+        tvr_FlightCommand_fields,
+        &cmd
+    );
 
 
-    // tvr_set_pid_t pid = TVR_SET_PID_INIT_ZERO;
+    if (result.status != RP_CODEC_OK) {
+        emit errorOccurred("Failed to encode packet");
+        return false;
+    }
 
 
-    // pid.x1 = (float)PIDValues[0].toDouble();
-    // pid.x2 = (float)PIDValues[1].toDouble();
-    // pid.x3 = (float)PIDValues[2].toDouble();
-    // pid.x4 = (float)PIDValues[3].toDouble();
-    // pid.x5 = (float)PIDValues[4].toDouble();
-    // pid.x6 = (float)PIDValues[5].toDouble();
-    // pid.x7 = (float)PIDValues[6].toDouble();
-    // pid.x8 = (float)PIDValues[7].toDouble();
-    // pid.x9 = (float)PIDValues[8].toDouble();
-
-
-    // uint8_t packet[300];
-    // rp_packet_encode_result_t result = rp_packet_encode(
-    //     packet,
-    //     sizeof(packet),
-    //     TVR_SET_PID_FIELDS,
-    //     &pid
-    // );
-
-
-    // if (result.status != RP_CODEC_OK) {
-    //     emit errorOccurred("Failed to encode packet");
-    //     return false;
-    // }
-
-
-    // QByteArray data(reinterpret_cast<const char*>(packet), result.written);
+    QByteArray data(reinterpret_cast<const char*>(packet), result.written);
    
-    // if (!m_bridge->sendBinary(which, data)) {
-    //     emit errorOccurred("Failed to send binary packet");
-    //     return false;
-    // }
+    if (!m_bridge->sendBinary(which, data)) {
+        emit errorOccurred("Failed to send binary packet");
+        return false;
+    }
    
-    // emit messageSent("setPID sent");
-    // return true;
-    return false; // Placeholder until implementation is complete
+    emit messageSent("SetPidGains sent");
+    return true;
 
 }
-
-
 
 
 
